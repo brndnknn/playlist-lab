@@ -11,7 +11,7 @@ This project is a playlist generator that takes a natural language prompt from t
 - Provides an interactive interface for users to refine their playlists.
 
 ## Technology Stack
-- **Local LLM Model:** Options may include LLaMA, GPT4All, or other open-source LLMs.
+- **Ollama** (Local LLM Orchestrator): Handles open-source LLMs such as LLaMA 2, GPT4All, Mistral, etc.
 - **Spotify API:** Used for playlist creation and song retrieval.
 - **Backend:** Python with Flask or FastAPI for handling API requests.
 - **Frontend (Optional):** React or a CLI-based interface for user input.
@@ -19,8 +19,9 @@ This project is a playlist generator that takes a natural language prompt from t
 ## TODO List
 ### 1. Research & Setup
 - [ ] **LLM Exploration:**
-  - Compare various open-source LLMs for local or self-hosted use.
-  - Evaluate hardware/software requirements and plan GPU or CPU utilization.
+  - Install and configure Ollama.
+  - Compare various open-source models it supports (e.g., LLaMA 2 7B, GPT4All, Mistral, etc.).
+  - Evaluate hardware usage and plan testing strategy for speed/accuracy.
 - [ ] **Spotify API Familiarization:**
   - Read through Spotify Web API documentation and set up a developer account.
   - Understand OAuth2 flow for obtaining access tokens.
@@ -31,16 +32,23 @@ This project is a playlist generator that takes a natural language prompt from t
 ### 2. Implement LLM Processing
 - [ ] **Prompt Parsing:**
   - Write a function to clean and parse user input, extracting genres, moods, or themes.
-- [ ] **LLM Integration Module:**
-  - Create a standalone module or class to interact with the local LLM.
-  - Implement logic to handle generation of relevant keywords or queries from user prompts.
+- [ ] **Ollama Integration Module:**
+  -  Create a Python module to send prompts to Ollama via its local API/CLI.
+  - Be able to switch between different models managed by Ollama.
 - [ ] **Performance Considerations:**
   - Optimize LLM usage to avoid excessive memory or compute overhead.
   - Cache or store partial results to prevent repeated processing.
 - [ ] **Prompt Engineering:**
   - Experiment with different prompt styles to yield more accurate or creative results.
 
-### 3. Integrate with Spotify API
+### 3. Model Comparison & Testing
+ - [] **Script to Compare Models (Speed & Accuracy):**
+  - Develop a script that systematically tests various Ollama models (e.g., LLaMA 2 7B vs. GPT4All).
+  - Measure inference speed (time to generate a playlist) and accuracy (whether the suggestions are real, playable tracks).
+  - Collect metrics (e.g., average generation time, token usage, success rate of valid song titles).
+  - Document the findings to guide which model is most effective for generating relevant playlist
+
+### 4. Integrate with Spotify API
 - [ ] **Authentication & Authorization:**
   - Implement OAuth 2.0 flow to acquire and refresh access tokens.
   - Store tokens securely.
@@ -54,7 +62,7 @@ This project is a playlist generator that takes a natural language prompt from t
   - Handle exceptions for network issues, invalid tokens, or track not found.
   - Ensure the system gracefully recovers or prompts for re-authentication.
 
-### 4. Build User Interface
+### 5. Build User Interface
 - [ ] **CLI Option:**
   - Implement a command-line interface for quick testing and usage.
   - Provide clear instructions on how to input prompts and see playlist results.
@@ -62,9 +70,9 @@ This project is a playlist generator that takes a natural language prompt from t
   - Set up a React (or other) frontend to collect user input and display playlists.
   - Integrate with the backend API to show feedback when tracks are added to playlists.
 
-### 5. Testing & Deployment
+### 6. Testing & Deployment
 - [ ] **Local Testing:**
-  - Test various prompt types to ensure the LLM processes them accurately.
+  - Test various prompt types to ensure Ollama processes them accurately.
   - Verify Spotify API calls work correctly under different scenarios.
 - [ ] **Continuous Integration:**
   - Set up basic CI pipelines (e.g., GitHub Actions) to run tests on each commit.
@@ -75,7 +83,7 @@ This project is a playlist generator that takes a natural language prompt from t
   - Decide on hosting environment (local server, self-hosted cloud VM, Docker, etc.).
   - Document the process for setting up the environment in production.
 
-### 6. Documentation & Future Enhancements
+### 7. Documentation & Future Enhancements
 - [ ] **Installation Instructions:**
   - Provide detailed steps for setting up Python environment, installing dependencies, and configuring the LLM.
   - Explain how to set up Spotify API credentials.
@@ -88,8 +96,12 @@ This project is a playlist generator that takes a natural language prompt from t
 - [ ] **Additional LLM Features:**
   - Experiment with generating track descriptions, reasons for inclusion, or dynamic transitions.
 
-## How to Run (To be updated)
-Instructions on setting up the environment, installing dependencies, and running the project will be added after implementation.
+## How to Run 
+  1. Install Ollama
+  2. Download a Model
+  3. Install Python Dependencies
+  4. Setup Spotify Credentials following the [Spotify Web API](https://developer.spotify.com/documentation/web-api)
+  5. Run the Project (further instructions here)
 
 ## Contributing
 Contributions are welcome! Feel free to submit issues or pull requests.
