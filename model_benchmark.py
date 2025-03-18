@@ -11,6 +11,14 @@ def benchmark_models(models, prompts, output_csv=None):
     "param output_csv: (Optional) Path to a CSV file to save the results.
     """
 
+    system_intstructions = """
+# system
+You are a playlist generator. Please output ONLY the list of songs. No extra commentary, disclaimers, or reasoning.
+
+# user
+
+"""
+
     results = []
 
     for model in models: 
@@ -18,11 +26,11 @@ def benchmark_models(models, prompts, output_csv=None):
             print(f"\n=== Testing model: {model} | Prompt: {prompt} ===")
             start_time = time.time()
 
-            # Example ollama command:
-            #   ollama run --model <model_name> "<prompt>"
-            # Output will be captured using subprocess.
+            full_prompt = system_intstructions + prompt
+
+
             cmd = [
-                "ollama", "run", model, prompt
+                "ollama", "run", model, full_prompt
             ]
 
             try:
@@ -72,8 +80,12 @@ if __name__ == "__main__":
     # list of models to test
     models_to_test = [
         "llama3.2:1b",
-        "llama3.2:latest"
-    ]
+        "llama3.2:latest",
+        "gemma3:1b", 
+        "gemma3:latest",
+        "gemma2:2b",
+        "mistral:latest"
+    ]  
 
     # list of prompts to test
     prompts_to_test = [
