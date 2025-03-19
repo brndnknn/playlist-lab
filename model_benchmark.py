@@ -13,7 +13,7 @@ def benchmark_models(models, prompts, output_csv=None):
 
     system_intstructions = """
 # system
-You are a playlist generator. Please output ONLY the list of songs. No extra commentary, disclaimers, or reasoning.
+You are a playlist generator. Please output ONLY the list of songs. Each song should have a title in quotes followed by a dash and then the artist name. No extra commentary, disclaimers, or reasoning.
 
 # user
 
