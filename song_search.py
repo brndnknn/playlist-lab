@@ -1,6 +1,8 @@
 import requests
 import base64
 import os
+import json
+import time
 from dotenv import load_dotenv
 
 
@@ -39,8 +41,43 @@ def get_access_token():
     response = requests.post(url, headers=headers, data=data)
     response.raise_for_status()
 
-    token_info = response.json()
-    return token_info["access_token"]
+    return response.json()
+    
+
+def save_token(token, time):
+
+    token_time = token["expires_in"] + time
+
+    token["expires_at"] = token_time
+
+    with open("token.json", "w") as json_file:
+        json.dump(token, json_file, indent=4, ensure_ascii=True)
+
+def check_token(token):
+
+    current_time = time.time() - 60
+
+    if token["expires_at"] > current_time:
+        return True
+    
+    return False
+
+def load_token():
+
+    if os.path.isfile('token.json'):
+
+        with open('token.json', 'r') as file:
+            token = json.load(file)
+        
+        if check_token(token):
+            return token
+    
+    current_time = time.time()
+    token = get_access_token()
+    save_token(token, current_time)
+
+    return token
+
 
 
 def track_exists(title, artist):
@@ -57,13 +94,13 @@ def track_exists(title, artist):
         HTTPError: If the Spotify API returns a non-200 status code.
     """
 
-    token = get_access_token()
+    token = load_token()
 
     query = f"track:{title} artist:{artist}"
 
     url = "https://api.spotify.com/v1/search"
     headers = {
-        "Authorization": f"Bearer {token}"
+        "Authorization": f"Bearer {token['access_token']}"
     }
     params = {
         "q": query,
