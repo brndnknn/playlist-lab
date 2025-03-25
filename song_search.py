@@ -1,83 +1,5 @@
 import requests
-import base64
-import os
-import json
-import time
-from dotenv import load_dotenv
-
-
-# load environment variables from .env
-load_dotenv()
-
-SPOTIFY_CLIENT_ID = os.environ.get("SPOTIFY_CLIENT_ID")
-SPOTIFY_CLIENT_SECRET = os.environ.get("SPOTIFY_CLIENT_SECRET")
-
-def get_access_token():
-    """
-    Obtain a Spotify API access token using the Client Credentials flow.
-
-    The Spotify Client ID and Client Secret should be stored in a .env file.
-
-    Returns:
-        str: A valid access token string.
-    Raises:
-        HTTPError: If the Spotify API returns a non-200 status code.
-    """
-
-
-    auth_string = f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_CLIENT_SECRET}"
-    auth_bytes = auth_string.encode("utf-8")
-    auth_base64 = base64.b64encode(auth_bytes).decode("utf-8")
-
-    url = "https://accounts.spotify.com/api/token"
-    headers = {
-        "Authorization": f"Basic {auth_base64}",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    data = {
-        "grant_type": "client_credentials"
-    }
-
-    response = requests.post(url, headers=headers, data=data)
-    response.raise_for_status()
-
-    return response.json()
-    
-
-def save_token(token, time):
-
-    token_time = token["expires_in"] + time
-
-    token["expires_at"] = token_time
-
-    with open("token.json", "w") as json_file:
-        json.dump(token, json_file, indent=4, ensure_ascii=True)
-
-def check_token(token):
-
-    current_time = time.time() - 60
-
-    if token["expires_at"] > current_time:
-        return True
-    
-    return False
-
-def load_token():
-
-    if os.path.isfile('token.json'):
-
-        with open('token.json', 'r') as file:
-            token = json.load(file)
-        
-        if check_token(token):
-            return token
-    
-    current_time = time.time()
-    token = get_access_token()
-    save_token(token, current_time)
-
-    return token
-
+from token_handler import TokenHandler
 
 
 def track_exists(title, artist):
@@ -94,7 +16,8 @@ def track_exists(title, artist):
         HTTPError: If the Spotify API returns a non-200 status code.
     """
 
-    token = load_token()
+    spotify_token = TokenHandler()
+    token = spotify_token.load_token()
 
     query = f"track:{title} artist:{artist}"
 
@@ -120,7 +43,6 @@ def track_exists(title, artist):
         return True
     else:
         return False
-
 
 
 if __name__ == "__main__":
