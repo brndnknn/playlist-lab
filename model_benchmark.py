@@ -1,6 +1,7 @@
 import subprocess
 import time
 import csv
+from llm_manager import OllamaManager
 
 def benchmark_models(models, prompts, output_csv=None):
     """
@@ -11,35 +12,21 @@ def benchmark_models(models, prompts, output_csv=None):
     "param output_csv: (Optional) Path to a CSV file to save the results.
     """
 
-    system_intstructions = """
-# system
-You are a playlist generator. Please output ONLY the list of songs. Each song should have a title in quotes followed by a dash and then the artist name. No extra commentary, disclaimers, or reasoning.
-
-# user
-
-"""
-
     results = []
+
+    llm_manager = OllamaManager()
 
     for model in models: 
         for prompt in prompts:
             print(f"\n=== Testing model: {model} | Prompt: {prompt} ===")
             start_time = time.time()
 
-            full_prompt = system_intstructions + prompt
-
-
-            cmd = [
-                "ollama", "run", model, full_prompt
-            ]
-
             try:
-                process = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                output_text = llm_manager.get_response(prompt, model)
                 end_time = time.time()
 
                 # Gather stats
                 runtime = end_time - start_time
-                output_text = process.stdout.strip()
 
                 # Log/print
                 print(f"Time taken: {runtime:.2f} seconds")
