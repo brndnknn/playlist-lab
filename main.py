@@ -1,4 +1,6 @@
 from model_benchmark import ModelBenchmark
+from token_handler import TokenHandler
+from spotify_client import SpotifyClient
 
 def main():
 
@@ -21,16 +23,16 @@ def main():
 
     csv_file_path = "ollama_benchmark_results.csv"
 
+    token_handler = TokenHandler()
+
+    token = token_handler.load_token()
+
+    spotify_client = SpotifyClient(token)
+
     benchmarker = ModelBenchmark(models=models_to_test,
                                prompts=prompts_to_test,
-                               output_csv=csv_file_path)
-    summary = benchmarker.run_benchmarks()
-    
-    # print("\n=== Summary of Results ===")
-    # for result in summary:
-    #     print(f"Model: {result['model']} | Prompt: {result['prompt']}",
-    #           f"Time: {result['runtime_sec']:.2f}s",
-    #           f"Output: {result['output'][:100]}...")
+                               output_csv=csv_file_path, spotify_client=spotify_client)
+    benchmarker.run_benchmarks()
         
 if __name__ == "__main__":
     main()
