@@ -6,7 +6,22 @@ from llm_manager import OllamaManager
 from spotify_client import SpotifyClient
 
 class ModelBenchmark:
+    """
+    Runs a series of benchmarks by prompting various Ollama models and measuring performance (speed, track validity, etc.).
+    """
     def __init__(self, models, prompts, output_csv, spotify_client):
+        """
+        Initializes the ModelBenchmark with the list of models to test, 
+        prompts to use, and references to a SpotifyClient for validation.
+
+        Args:
+            models (list): A list of model identifiers (strings) recognized by Ollama.
+            prompts (list): A list of prompt strings to test each model with.
+            output_csv (str): Path to a CSV file where results will be written. 
+                              Set to None if you don't want CSV output.
+            spotify_client (SpotifyClient): An instance of SpotifyClient for 
+                                            checking track existence.
+        """
         self.models = models
         self.prompts = prompts
         self.output_csv = output_csv
@@ -23,6 +38,14 @@ class ModelBenchmark:
             self.__write_csv()
 
     def __run_single_test(self, model, prompt):
+        """
+        Runs a single test of (model, prompt), measuring time, 
+        capturing output, and parsing track validity via Spotify.
+
+        Args:
+            model (str): The Ollama model name to use.
+            prompt (str): The user prompt to pass to the LLM.
+        """
         print(f"\n=== Testing model: {model} | Prompt: {prompt} ===")
         start_time = time.time()
         
@@ -87,7 +110,18 @@ class ModelBenchmark:
             writer.writerows(self.results)
 
     def __validate_tracks(self, output_text):
+        """
+        Parses the raw model output and verifies each track 
+        against the SpotifyClient.
 
+        Args:
+            output_text (str): The text returned by the LLM, 
+                               typically lines of \"Title\" - Artist.
+
+        Returns:
+            tuple: (valid_count, total_count) indicating how many 
+                   tracks were actually found vs. total lines parsed.
+        """
         lines = output_text.split('\n')
         pattern = re.compile(r'^\"(?P<title>[^\"]+)\"\s*-\s*(?P<artist>.+)$')
 

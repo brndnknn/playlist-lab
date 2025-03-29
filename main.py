@@ -3,7 +3,14 @@ from token_handler import TokenHandler
 from spotify_client import SpotifyClient
 
 def main():
+    """
+    Main entry point to run the LLM model benchmarks with 
+    specified models and prompts.
 
+    Loads a valid Spotify API token, constructs the SpotifyClient
+    and ModelBenchmark classes, and runs the benchmarks.
+    """
+    
     # list of models to test
     models_to_test = [
         "llama3.2:1b",
