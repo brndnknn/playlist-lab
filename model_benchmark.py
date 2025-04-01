@@ -53,7 +53,6 @@ class ModelBenchmark:
         
         try:
             output_text = self.llm_manager.get_response(prompt, model)
-            # print(output_text)
             mid_output = self.llm_manager.rewrite_json(output_text, model)
             json_output = extract_array(mid_output)
             end_time = time.time()
@@ -72,8 +71,6 @@ class ModelBenchmark:
                 "prompt": prompt,
                 "runtime_sec": runtime,
                 "output": output_text,
-                "mid_output": mid_output,
-                "json_output": json_output,
                 "tracks_parsed": total_tracks,
                 "tracks_found": valid_tracks
             }
@@ -109,8 +106,6 @@ class ModelBenchmark:
                 "prompt",
                 "runtime_sec",
                 "output",
-                "mid_output",
-                "json_output",
                 "tracks_parsed",
                 "tracks_found"
             ]
