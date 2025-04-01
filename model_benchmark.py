@@ -2,8 +2,10 @@ import subprocess
 import time
 import csv
 import re
+import json
 from llm_manager import OllamaManager
 from spotify_client import SpotifyClient
+from helpers import extract_array
 
 class ModelBenchmark:
     """
@@ -51,14 +53,17 @@ class ModelBenchmark:
         
         try:
             output_text = self.llm_manager.get_response(prompt, model)
+            # print(output_text)
+            mid_output = self.llm_manager.rewrite_json(output_text, model)
+            json_output = extract_array(mid_output)
             end_time = time.time()
             runtime = end_time - start_time
 
-            valid_tracks , total_tracks = self.__validate_tracks(output_text)
+            valid_tracks , total_tracks = self.__validate_tracks(json_output)
 
             # Log/print
             print(f"Time taken: {runtime:.2f} seconds")
-            print(f"Model output:\n{output_text}\n")
+            # print(f"Model output:\n{json_output}\n")
             print(f"Tracks parsed: {total_tracks}, tracks found on Spotify: {valid_tracks}")
 
             # Store for summary
@@ -67,6 +72,8 @@ class ModelBenchmark:
                 "prompt": prompt,
                 "runtime_sec": runtime,
                 "output": output_text,
+                "mid_output": mid_output,
+                "json_output": json_output,
                 "tracks_parsed": total_tracks,
                 "tracks_found": valid_tracks
             }
@@ -102,6 +109,8 @@ class ModelBenchmark:
                 "prompt",
                 "runtime_sec",
                 "output",
+                "mid_output",
+                "json_output",
                 "tracks_parsed",
                 "tracks_found"
             ]
@@ -122,17 +131,20 @@ class ModelBenchmark:
             tuple: (valid_count, total_count) indicating how many 
                    tracks were actually found vs. total lines parsed.
         """
-        lines = output_text.split('\n')
-        pattern = re.compile(r'^\"(?P<title>[^\"]+)\"\s*-\s*(?P<artist>.+)$')
 
         total = 0
         valid = 0
-        for line in lines:
-            match = pattern.match(line.strip())
-            if match: 
+
+        try:
+            playlist = json.loads(output_text)
+            for track in playlist:
+                title = track["title"]
+                artist = track["artist"]
                 total += 1
-                title = match.group('title')
-                artist = match.group('artist')
                 if self.spotify_client.track_exists(title, artist):
                     valid += 1
+
+        except json.JSONDecodeError:
+            print("JSON error")
+            return (valid, total)
         return (valid, total)

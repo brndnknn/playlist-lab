@@ -14,11 +14,11 @@ class OllamaManager:
         The system_instructions attribute is prepended to the user's prompt before calling ollama run. It instructs the model to output only a formatted list of songs, with minial commentary.
         """
         self.system_instructions = """
-# system
-You are a playlist generator. Please output ONLY the list of songs. Each song should have a title in quotes followed by a dash and then the artist name. No extra commentary, disclaimers, or reasoning.
+You are a playlist generator. You output a list of song titles and artists based on the user's prompt. Use the format "song title" - "artist name". Only output real songs. No commentary, no extra words. Here's the prompt for the playlist:
+"""
 
-# user
-
+        self.json_instructions = """
+Rewrite the following playlist in valid JSON only - no commentary or extra text. Keys should be "title" and "artist". The entire output must be an array of objects, each object containing the keys and the coresponding values. No other keys are allowed. Here's the playlist:
 """
 
     def get_response(self, prompt, model):
@@ -45,4 +45,15 @@ You are a playlist generator. Please output ONLY the list of songs. Each song sh
 
         process = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
+        return process.stdout.strip()
+    
+    def rewrite_json(self, text, model):
+        full_text = self.json_instructions + text
+
+        cmd= [
+            "ollama", "run",
+            model, full_text
+        ]
+
+        process = subprocess.run(cmd, capture_output=True, text=True, check=True)
         return process.stdout.strip()
