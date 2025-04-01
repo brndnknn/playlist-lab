@@ -50,8 +50,15 @@ class SpotifyClient:
 
         # If at least one item exists, print the items and return true
         if tracks:
+            print(title, artist)
             print(tracks[0]["external_urls"])
-            return True
+            print()
+            output_text = (f"{title}, {artist}, {tracks[0]['external_urls']}")
+            return [True, output_text]
         else:
-            return False
+            print("Search failed")
+            print(title, artist)
+            print()
+            output_text = (f"{title}, {artist}, Search failed")
+            return [False, output_text]
 

@@ -58,7 +58,7 @@ class ModelBenchmark:
             end_time = time.time()
             runtime = end_time - start_time
 
-            valid_tracks , total_tracks = self.__validate_tracks(json_output)
+            valid_tracks , total_tracks, check_results = self.__validate_tracks(json_output)
 
             # Log/print
             print(f"Time taken: {runtime:.2f} seconds")
@@ -72,7 +72,8 @@ class ModelBenchmark:
                 "runtime_sec": runtime,
                 "output": output_text,
                 "tracks_parsed": total_tracks,
-                "tracks_found": valid_tracks
+                "tracks_found": valid_tracks,
+                "check_results": check_results
             }
 
             self.results.append(result)
@@ -107,13 +108,14 @@ class ModelBenchmark:
                 "runtime_sec",
                 "output",
                 "tracks_parsed",
-                "tracks_found"
+                "tracks_found",
+                "check_results"
             ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(self.results)
 
-    def __validate_tracks(self, output_text):
+    def __validate_tracks(self, input_text):
         """
         Parses the raw model output and verifies each track 
         against the SpotifyClient.
@@ -129,17 +131,21 @@ class ModelBenchmark:
 
         total = 0
         valid = 0
+        output_text = ""
 
         try:
-            playlist = json.loads(output_text)
+            playlist = json.loads(input_text)
             for track in playlist:
                 title = track["title"]
                 artist = track["artist"]
                 total += 1
-                if self.spotify_client.track_exists(title, artist):
+                results = self.spotify_client.track_exists(title, artist)
+                if results[0] == True:
                     valid += 1
+                output_text = output_text + results[1] + '\n'
 
         except json.JSONDecodeError:
             print("JSON error")
-            return (valid, total)
-        return (valid, total)
+            input_text = f"JSON ERROR \n {input_text}"
+            return (valid, total, input_text)
+        return (valid, total, output_text)
