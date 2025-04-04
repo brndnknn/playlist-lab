@@ -6,6 +6,7 @@ import json
 from llm_manager import OllamaManager
 from spotify_client import SpotifyClient
 from helpers import extract_array
+from helpers import has_keys
 
 class ModelBenchmark:
     """
@@ -33,6 +34,8 @@ class ModelBenchmark:
 
     def run_benchmarks(self):
         for model in self.models:
+            if not self.llm_manager.is_ollama_running(model):
+                self.llm_manager.start_ollama_server(model)
             for prompt in self.prompts:
                 self.__run_single_test(model, prompt)
 
@@ -49,16 +52,19 @@ class ModelBenchmark:
             prompt (str): The user prompt to pass to the LLM.
         """
         print(f"\n=== Testing model: {model} | Prompt: {prompt} ===")
+
         start_time = time.time()
         
         try:
-            output_text = self.llm_manager.get_response(prompt, model)
-            mid_output = self.llm_manager.rewrite_json(output_text, model)
-            json_output = extract_array(mid_output)
+            # output_text = self.llm_manager.get_response(prompt, model)
+            # mid_output = self.llm_manager.rewrite_json(output_text, model)
+            # json_output = extract_array(mid_output)
+            response = self.llm_manager.get_response(model, prompt)
+            print(response)
             end_time = time.time()
             runtime = end_time - start_time
 
-            valid_tracks , total_tracks, check_results = self.__validate_tracks(json_output)
+            valid_tracks , total_tracks, check_results = self.__validate_tracks(response)
 
             # Log/print
             print(f"Time taken: {runtime:.2f} seconds")
@@ -70,7 +76,7 @@ class ModelBenchmark:
                 "model": model,
                 "prompt": prompt,
                 "runtime_sec": runtime,
-                "output": output_text,
+                "output": response,
                 "tracks_parsed": total_tracks,
                 "tracks_found": valid_tracks,
                 "check_results": check_results
@@ -135,14 +141,19 @@ class ModelBenchmark:
 
         try:
             playlist = json.loads(input_text)
+            start_time = time.time()
             for track in playlist:
-                title = track["title"]
-                artist = track["artist"]
-                total += 1
-                results = self.spotify_client.track_exists(title, artist)
-                if results[0] == True:
-                    valid += 1
-                output_text = output_text + results[1] + '\n'
+                if has_keys(track, "title", "artist"):
+                    title = track["title"]
+                    artist = track["artist"]
+                    total += 1
+                    results = self.spotify_client.track_exists(title, artist)
+                    if results[0] == True:
+                        valid += 1
+                    output_text = output_text + results[1] + '\n'
+            end_time = time.time()
+            run_time = end_time - start_time
+            print(f"Validation time: {run_time:.2f}")
 
         except json.JSONDecodeError:
             print("JSON error")
