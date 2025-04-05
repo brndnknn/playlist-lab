@@ -11,7 +11,7 @@ class OllamaManager:
 
     def __init__(self):
         self.url = "http://localhost:11434/api/generate"
-        self.system_prompt = "Respond in JSON. Each song should be represented by an object with a 'title' and 'artist'."
+        self.system_prompt = "Respond in JSON. The list of songs should be returned in an array. Each song should be represented by an object with the keys 'title' and 'artist'. "
 
     def start_ollama_server(self, model):
         print("Starting Ollama server...")
