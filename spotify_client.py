@@ -1,6 +1,5 @@
-import requests
-from token_handler import TokenHandler
-
+from logger_config import logger
+from helpers import logged_request
 class SpotifyClient:
     """
     Provides methods to interact with the Spotify Web API, 
@@ -42,8 +41,9 @@ class SpotifyClient:
             "limit": 1
         }
 
-        response = requests.get(url, headers=headers, params=params)
-        response.raise_for_status()
+        logger.info(f"Searching Spotify for: {title} by {artist}")
+        response = logged_request("GET", url, headers=headers, params=params)
+
         data = response.json()
 
         tracks = data.get("tracks", {}).get("items", [])

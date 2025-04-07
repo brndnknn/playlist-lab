@@ -4,8 +4,6 @@ import csv
 import re
 import json
 from llm_manager import OllamaManager
-from spotify_client import SpotifyClient
-from helpers import extract_array
 from helpers import has_keys
 
 class ModelBenchmark:
@@ -34,6 +32,7 @@ class ModelBenchmark:
 
     def run_benchmarks(self):
         for model in self.models:
+            print(f'Starting model {model}')
             if not self.llm_manager.is_ollama_running(model):
                 self.llm_manager.start_ollama_server(model)
             for prompt in self.prompts:
@@ -56,18 +55,17 @@ class ModelBenchmark:
         start_time = time.time()
         
         try:
-            # output_text = self.llm_manager.get_response(prompt, model)
-            # mid_output = self.llm_manager.rewrite_json(output_text, model)
-            # json_output = extract_array(mid_output)
             response = self.llm_manager.get_response(model, prompt)
             print(response)
             end_time = time.time()
             runtime = end_time - start_time
-
-            valid_tracks , total_tracks, check_results = self.__validate_tracks(response)
-
+            
             # Log/print
             print(f"Time taken: {runtime:.2f} seconds")
+            
+            valid_tracks , total_tracks, check_results = self.__validate_tracks(response)
+
+            
             # print(f"Model output:\n{json_output}\n")
             print(f"Tracks parsed: {total_tracks}, tracks found on Spotify: {valid_tracks}")
 
@@ -138,6 +136,9 @@ class ModelBenchmark:
         total = 0
         valid = 0
         output_text = ""
+
+        if not isinstance(input_text, str):
+            return (0, 0, 'Bad model response')
 
         try:
             playlist = json.loads(input_text)
