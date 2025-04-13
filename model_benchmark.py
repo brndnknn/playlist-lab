@@ -5,6 +5,7 @@ import re
 import json
 from llm_manager import OllamaManager
 from helpers import has_keys
+from collections import defaultdict
 
 class ModelBenchmark:
     """
@@ -101,6 +102,17 @@ class ModelBenchmark:
 
             self.results.append(result)
 
+    def is_valid_json_playlist(self, output):
+        """Returns True if the output is valid JSON representing a playlist:
+        a list of at least 5 objects with keys 'title' and 'artist'."""
+        try:
+            parsed = json.loads(output)
+            if isinstance(parsed, list) and len(parsed) >= 5:
+                return all(isinstance(item, dict) and "title" in item and "artist" in item for item in parsed)
+            return False
+        except Exception:
+            return False
+
     def __write_csv(self):
         """
         Write results to CSV.
@@ -118,6 +130,82 @@ class ModelBenchmark:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(self.results)
+
+            # Append summaries after a blank line.
+            csvfile.write("\n")
+            writer.writerow({"model": "=== Summary by Model ==="})
+
+            # Write header row for model summary.
+            writer.writerow({
+                "model": "Model",
+                "prompt": "Runs",
+                "runtime_sec": "Avg Runtime (sec)",
+                "output": "Valid JSON Success (%)",
+                "tracks_parsed": "Avg Tracks Parsed",
+                "tracks_found": "Avg Tracks Found",
+            })
+
+            # FIX CHATGPT CODE AFTER HERE
+
+            # Group results by model
+            model_groups = defaultdict(list)
+            for result in self.results:
+                model_groups[result["model"]].append(result)
+
+            for model, entries in model_groups.items():
+                runs = len(entries)
+                avg_runtime = sum(entry["runtime_sec"] for entry in entries) / runs
+                # Compute valid JSON success rate per model.
+                valid_count = sum(1 for entry in entries if self.is_valid_json_playlist(entry["output"]))
+                valid_rate = 100 * valid_count / runs
+                avg_tracks_parsed = sum(entry["tracks_parsed"] for entry in entries) / runs
+                avg_tracks_found = sum(entry["tracks_found"] for entry in entries) / runs
+
+                writer.writerow({
+                    "model": model,
+                    "prompt": runs,  # Using the "prompt" column to show number of runs here.
+                    "runtime_sec": round(avg_runtime, 2),
+                    "output": round(valid_rate, 1),
+                    "tracks_parsed": round(avg_tracks_parsed, 1),
+                    "tracks_found": round(avg_tracks_found, 1),
+                })
+
+            # Append a blank line before prompt summary.
+            csvfile.write("\n")
+            writer.writerow({"model": "=== Summary by Prompt ==="})
+            writer.writerow({
+                "model": "Prompt",
+                "prompt": "Runs",
+                "runtime_sec": "Avg Runtime (sec)",
+                "output": "Valid JSON Success (%)",
+                "tracks_parsed": "Avg Tracks Parsed",
+                "tracks_found": "Avg Tracks Found",
+            })
+
+            # Group results by prompt
+            prompt_groups = defaultdict(list)
+            for result in self.results:
+                prompt_groups[result["prompt"]].append(result)
+
+            for prompt, entries in prompt_groups.items():
+                runs = len(entries)
+                avg_runtime = sum(entry["runtime_sec"] for entry in entries) / runs
+                valid_count = sum(1 for entry in entries if self.is_valid_json_playlist(entry["output"]))
+                valid_rate = 100 * valid_count / runs
+                avg_tracks_parsed = sum(entry["tracks_parsed"] for entry in entries) / runs
+                avg_tracks_found = sum(entry["tracks_found"] for entry in entries) / runs
+
+                writer.writerow({
+                    "model": prompt,
+                    "prompt": runs,
+                    "runtime_sec": round(avg_runtime, 2),
+                    "output": round(valid_rate, 1),
+                    "tracks_parsed": round(avg_tracks_parsed, 1),
+                    "tracks_found": round(avg_tracks_found, 1),
+                })
+
+
+
 
     def __validate_tracks(self, input_text):
         """

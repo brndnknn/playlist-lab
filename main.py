@@ -14,15 +14,10 @@ def main():
     # list of models to test
     models_to_test = [
         'llama3.2:3b-instruct-q8_0',
-        'llama3.2:1b-instruct-fp16',
         'gemma3:4b-it-q8_0',
-        'gemma3:1b-it-fp16',
         'gemma2:2b',
-        'llama3.1:latest',
-        'gemma3:1b',
         'gemma3:latest',
         'mistral:latest',
-        'llama3.2:1b',
         'llama3.2:latest'
     ]  
 
@@ -36,12 +31,12 @@ def main():
         "I want a playlist with a chill vibe, mainly focusing on acoustic music.",
         "Suggest a playlist with songs by female vocalists."
 
-        # # Medium Complexity:
-        # "Generate a playlist that reflects a feeling of nostalgia for the 80s.",
-        # "Create a playlist with songs that are generally upbeat and energetic.",
-        # "Give me a playlist centered around the themes of heartbreak and loss.",
-        # "I'm looking for a playlist with a blend of electronic dance music and chillwave.",
-        # "Suggest a playlist that captures the feeling of a summer road trip.",
+        # Medium Complexity:
+        "Generate a playlist that reflects a feeling of nostalgia for the 80s.",
+        "Create a playlist with songs that are generally upbeat and energetic.",
+        "Give me a playlist centered around the themes of heartbreak and loss.",
+        "I'm looking for a playlist with a blend of electronic dance music and chillwave.",
+        "Suggest a playlist that captures the feeling of a summer road trip.",
 
 
         # # Advanced & Abstract (Good for checking nuance & creativity):
