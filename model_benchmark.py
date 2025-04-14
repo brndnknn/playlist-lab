@@ -143,9 +143,8 @@ class ModelBenchmark:
                 "output": "Valid JSON Success (%)",
                 "tracks_parsed": "Avg Tracks Parsed",
                 "tracks_found": "Avg Tracks Found",
+                "check_results": "Valid Tracks (%)"
             })
-
-            # FIX CHATGPT CODE AFTER HERE
 
             # Group results by model
             model_groups = defaultdict(list)
@@ -160,14 +159,16 @@ class ModelBenchmark:
                 valid_rate = 100 * valid_count / runs
                 avg_tracks_parsed = sum(entry["tracks_parsed"] for entry in entries) / runs
                 avg_tracks_found = sum(entry["tracks_found"] for entry in entries) / runs
+                valid_track_rate = avg_tracks_found / avg_tracks_parsed
 
                 writer.writerow({
                     "model": model,
                     "prompt": runs,  # Using the "prompt" column to show number of runs here.
                     "runtime_sec": round(avg_runtime, 2),
-                    "output": round(valid_rate, 1),
-                    "tracks_parsed": round(avg_tracks_parsed, 1),
-                    "tracks_found": round(avg_tracks_found, 1),
+                    "output": round(valid_rate, 2),
+                    "tracks_parsed": round(avg_tracks_parsed, 2),
+                    "tracks_found": round(avg_tracks_found, 2),
+                    "check_results": round(valid_track_rate, 2)
                 })
 
             # Append a blank line before prompt summary.
@@ -180,6 +181,7 @@ class ModelBenchmark:
                 "output": "Valid JSON Success (%)",
                 "tracks_parsed": "Avg Tracks Parsed",
                 "tracks_found": "Avg Tracks Found",
+                "check_results": "Valid Tracks (%)"
             })
 
             # Group results by prompt
@@ -194,14 +196,16 @@ class ModelBenchmark:
                 valid_rate = 100 * valid_count / runs
                 avg_tracks_parsed = sum(entry["tracks_parsed"] for entry in entries) / runs
                 avg_tracks_found = sum(entry["tracks_found"] for entry in entries) / runs
+                valid_track_rate = avg_tracks_found / avg_tracks_parsed
 
                 writer.writerow({
                     "model": prompt,
                     "prompt": runs,
                     "runtime_sec": round(avg_runtime, 2),
-                    "output": round(valid_rate, 1),
-                    "tracks_parsed": round(avg_tracks_parsed, 1),
-                    "tracks_found": round(avg_tracks_found, 1),
+                    "output": round(valid_rate, 2),
+                    "tracks_parsed": round(avg_tracks_parsed, 2),
+                    "tracks_found": round(avg_tracks_found, 2),
+                    "check_results": round(valid_track_rate, 2)
                 })
 
 
