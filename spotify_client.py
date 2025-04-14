@@ -42,23 +42,28 @@ class SpotifyClient:
         }
 
         logger.info(f"Searching Spotify for: {title} by {artist}")
-        response = logged_request("GET", url, headers=headers, params=params)
+        try:
+            response = logged_request("GET", url, headers=headers, params=params)
 
-        data = response.json()
+            data = response.json()
 
-        tracks = data.get("tracks", {}).get("items", [])
+            tracks = data.get("tracks", {}).get("items", [])
 
-        # If at least one item exists, print the items and return true
-        if tracks:
-            print(title, artist)
-            print(tracks[0]["external_urls"])
-            print()
-            output_text = (f"{title}, {artist}, {tracks[0]['external_urls']}")
-            return [True, output_text]
-        else:
-            print("Search failed")
-            print(title, artist)
-            print()
-            output_text = (f"{title}, {artist}, Search failed")
-            return [False, output_text]
+            # If at least one item exists, print the items and return true
+            if tracks:
+                print(title, artist)
+                print(tracks[0]["external_urls"])
+                print()
+                output_text = (f"{title}, {artist}, {tracks[0]['external_urls']}")
+                return [True, output_text]
+            else:
+                print("Search failed")
+                print(title, artist)
+                print()
+                output_text = (f"{title}, {artist}, Search failed")
+                return [False, output_text]
+            
+        except Exception as e:
+            logger.error(f"HTTP Error {e}, skipping this track")
+            return [False, f"HTTP Error while searching for {title}, {artist}."]
 

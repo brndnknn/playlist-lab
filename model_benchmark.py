@@ -4,7 +4,7 @@ import csv
 import re
 import json
 from llm_manager import OllamaManager
-from helpers import has_keys
+from helpers import has_keys, extract_array
 from collections import defaultdict
 
 class ModelBenchmark:
@@ -230,22 +230,30 @@ class ModelBenchmark:
 
         try:
             playlist = json.loads(input_text)
-            start_time = time.time()
-            for track in playlist:
-                if has_keys(track, "title", "artist"):
-                    title = track["title"]
-                    artist = track["artist"]
-                    total += 1
-                    results = self.spotify_client.track_exists(title, artist)
-                    if results[0] == True:
-                        valid += 1
-                    output_text = output_text + results[1] + '\n'
-            end_time = time.time()
-            run_time = end_time - start_time
-            print(f"Validation time: {run_time:.2f}")
 
         except json.JSONDecodeError:
-            print("JSON error")
-            input_text = f"JSON ERROR \n {input_text}"
-            return (valid, total, input_text)
+            print('fixing JSON array', input_text)
+            fixed_text = extract_array(input_text[1:])
+            try:
+                playlist = json.loads(fixed_text)
+                
+            except json.JSONDecodeError:
+                print("JSON error")
+                input_text = f"JSON ERROR \n {input_text}"
+                return (valid, total, input_text)
+        
+        start_time = time.time()
+        for track in playlist:
+            if has_keys(track, "title", "artist"):
+                title = track["title"]
+                artist = track["artist"]
+                total += 1
+                results = self.spotify_client.track_exists(title, artist)
+                if results[0] == True:
+                    valid += 1
+                output_text = output_text + results[1] + '\n'
+        end_time = time.time()
+        run_time = end_time - start_time
+        print(f"Validation time: {run_time:.2f}")
+        
         return (valid, total, output_text)

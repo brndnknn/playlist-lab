@@ -39,12 +39,12 @@ def main():
         "Suggest a playlist that captures the feeling of a summer road trip.",
 
 
-        # # Advanced & Abstract (Good for checking nuance & creativity):
-        # "Imagine Napoleon Bonaparte was listening to Spotify in the 19th century.  Create a playlist of songs he would have listend to while conquering the Alps",
-        # "Create a playlist evoking the atmosphere of a dimly lit jazz club in 1960s New Orleans. Include songs with a melancholic feel and soulful instrumentation.",
-        # "Design a playlist representing a journey through a digital dreamscape. Think neon colors, glitch effects, and fragmented melodies.",
-        # "Craft a playlist that embodies the spirit of cyberpunk - a blend of dark, atmospheric soundscapes, electronic rhythms, and gritty samples.",
-        # "Generate a playlist that simulates a rainy afternoon in a small European town, focusing on themes of introspection and quiet observation.",
+        # Advanced & Abstract (Good for checking nuance & creativity):
+        "Imagine Napoleon Bonaparte was listening to Spotify in the 19th century. Create a playlist of songs he would have listend to while conquering the Alps",
+        "Create a playlist evoking the atmosphere of a dimly lit jazz club in 1960s New Orleans. Include songs with a melancholic feel and soulful instrumentation.",
+        "Design a playlist representing a journey through a digital dreamscape. Think neon colors, glitch effects, and fragmented melodies.",
+        "Craft a playlist that embodies the spirit of cyberpunk - a blend of dark, atmospheric soundscapes, electronic rhythms, and gritty samples.",
+        "Generate a playlist that simulates a rainy afternoon in a small European town, focusing on themes of introspection and quiet observation.",
 
         # # Bonus - For really pushing the boundaries:**
         # "Compose a playlist that tells the story of a lost lighthouse keeper, inspired by the isolation and beauty of the sea."
