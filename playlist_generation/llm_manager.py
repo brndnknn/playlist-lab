@@ -1,8 +1,8 @@
 import subprocess
 import requests
 import time
-from helpers import extract_array
-from helpers import logged_request
+from utils.helpers import extract_array
+from utils.helpers import logged_request
 
 class OllamaManager:
     """

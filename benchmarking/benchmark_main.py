@@ -1,6 +1,6 @@
-from model_benchmark import ModelBenchmark
-from token_handler import TokenHandler
-from spotify_client import SpotifyClient
+from benchmarking.model_benchmark import ModelBenchmark
+from api_clients.token_handler import TokenHandler
+from api_clients.spotify_client import SpotifyClient
 
 def main():
     """

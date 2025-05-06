@@ -3,8 +3,8 @@ import time
 import csv
 import re
 import json
-from llm_manager import OllamaManager
-from helpers import has_keys, extract_array
+from playlist_generation.llm_manager import OllamaManager
+from utils.helpers import has_keys, extract_array
 from collections import defaultdict
 
 class ModelBenchmark:

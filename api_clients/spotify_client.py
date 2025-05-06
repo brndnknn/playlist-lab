@@ -1,5 +1,5 @@
-from logger_config import logger
-from helpers import logged_request
+from utils.logger_config import logger
+from utils.helpers import logged_request
 class SpotifyClient:
     """
     Provides methods to interact with the Spotify Web API, 
