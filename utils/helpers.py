@@ -1,5 +1,5 @@
 import requests
-from logger_config import logger
+from utils.logger_config import logger
 
 
 def extract_array(text):

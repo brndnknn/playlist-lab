@@ -20,7 +20,7 @@ class TokenHandler:
         """
         self.client_id = os.environ.get("SPOTIFY_CLIENT_ID")
         self.client_secret = os.environ.get("SPOTIFY_CLIENT_SECRET")
-        self.token_file = "token.json"
+        self.token_file = "../token.json"
         self.token = {}
 
 

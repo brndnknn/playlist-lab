@@ -12,7 +12,7 @@ console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setLevel(logging.INFO)
 console_handler.setFormatter(formatter)
 
-file_handler = logging.FileHandler("playlistGenAI.log", mode="a")
+file_handler = logging.FileHandler("../playlistGenAI.log", mode="a")
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 
