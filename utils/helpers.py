@@ -16,17 +16,6 @@ def has_keys(obj, key1, key2):
         return False 
     return key1 in obj and key2 in obj
 
-def is_valid_json_playlist(output):
-    """Returns True if the output is valid JSON representing a playlist:
-    a list of at least 5 objects with keys 'title' and 'artist'."""
-    try:
-        parsed = json.loads(output)
-        if isinstance(parsed, list) and len(parsed) >= 5:
-            return all(isinstance(item, dict) and "title" in item and "artist" in item for item in parsed)
-        return False
-    except Exception:
-        return False
-
 
 def logged_request(method, url, **kwargs):
     """
