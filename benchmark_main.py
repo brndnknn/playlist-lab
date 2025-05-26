@@ -14,7 +14,7 @@ def main():
     # list of models to test
     models_to_test = [
         'gemma2:2b',
-        # 'llama3.2:latest',
+        'llama3.2:latest',
         # 'gemma3:latest',
         # 'llama3.2:3b-instruct-q8_0',
         # 'mistral:latest',
@@ -26,7 +26,7 @@ def main():
 
         # Easy & Straightforward:
         "Create a playlist of upbeat indie pop songs.",
-        # "Generate a playlist with songs by artists known for their synth-pop sound.",
+        "Generate a playlist with songs by artists known for their synth-pop sound.",
         # "Give me a playlist with some classic rock anthems.",
         # "I want a playlist with a chill vibe, mainly focusing on acoustic music.",
         # "Suggest a playlist with songs by female vocalists."
@@ -50,7 +50,7 @@ def main():
         # "Compose a playlist that tells the story of a lost lighthouse keeper, inspired by the isolation and beauty of the sea."
     ]
 
-    csv_file_path = "../ollama_benchmark_results.csv"
+    csv_file_path = "ollama_benchmark_results.csv"
 
     token_handler = TokenHandler()
 

@@ -6,27 +6,16 @@ import json
 from playlist_generation.llm_manager import OllamaManager
 from utils.helpers import has_keys, extract_array
 from collections import defaultdict
+from benchmarking.base_benchmark import BaseBenchmark
 
-class ModelBenchmark:
+class ModelBenchmark(BaseBenchmark):
     """
     Runs a series of benchmarks by prompting various Ollama models and measuring performance (speed, track validity, etc.).
     """
     def __init__(self, models, prompts, output_csv, spotify_client):
-        """
-        Initializes the ModelBenchmark with the list of models to test, 
-        prompts to use, and references to a SpotifyClient for validation.
+        super().__init__(prompts, models, output_csv)
 
-        Args:
-            models (list): A list of model identifiers (strings) recognized by Ollama.
-            prompts (list): A list of prompt strings to test each model with.
-            output_csv (str): Path to a CSV file where results will be written. 
-                              Set to None if you don't want CSV output.
-            spotify_client (SpotifyClient): An instance of SpotifyClient for 
-                                            checking track existence.
-        """
-        self.models = models
-        self.prompts = prompts
-        self.output_csv = output_csv
+ 
         self.results = []
         self.llm_manager = OllamaManager()
         self.spotify_client = spotify_client
@@ -117,19 +106,33 @@ class ModelBenchmark:
         """
         Write results to CSV.
         """
-        with open(self.output_csv, "w", newline="", encoding="utf-8") as csvfile:
-            fieldnames = [
-                "model",
-                "prompt",
-                "runtime_sec",
-                "output",
-                "tracks_parsed",
-                "tracks_found",
-                "check_results"
-            ]
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(self.results)
+        # with open(self.output_csv, "w", newline="", encoding="utf-8") as csvfile:
+        #     fieldnames = [
+        #         "model",
+        #         "prompt",
+        #         "runtime_sec",
+        #         "output",
+        #         "tracks_parsed",
+        #         "tracks_found",
+        #         "check_results"
+        #     ]
+        #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #     writer.writeheader()
+        #     writer.writerows(self.results)
+
+        fieldnames = [
+            "model",
+            "prompt",
+            "runtime_sec",
+            "output",
+            "tracks_parsed",
+            "tracks_found",
+            "check_results"
+        ]
+        self.write_csv(fieldnames)
+
+        with open(self.output_csv, "a", encoding="utf-8", newline="") as csvfile:
+            writer=csv.DictWriter(csvfile, fieldnames=fieldnames)
 
             # Append summaries after a blank line.
             csvfile.write("\n")

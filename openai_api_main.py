@@ -21,9 +21,9 @@ def main():
         # "Playlist for Sherlock Holmes solving the case of missing socks",
         # "The robot uprising’s battle playlist (but it’s all disco)",
         # "Music for dramatically flipping through magazines in waiting rooms",
-        # "Playlist for aliens first encountering human pizza",
-        # "What music plays in Shrek’s mind while he's meditating",
-        "Songs to listen to while seductively making a sandwich"
+        "Playlist for aliens first encountering human pizza",
+        "What music plays in Shrek’s mind while he's meditating",
+        # "Songs to listen to while seductively making a sandwich"
     ]
 
     models = [

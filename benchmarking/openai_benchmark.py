@@ -1,20 +1,12 @@
 import json
 import csv
 from utils.helpers import has_keys, extract_array
+from benchmarking.base_benchmark import BaseBenchmark
 
-class OpenAIModelBenchmark:
+class OpenAIModelBenchmark(BaseBenchmark):
     def __init__(self, prompts, models, manager, output_csv):
-        """
-        :param prompts: List of prompt strings to use
-        :param models: List of OpenAI model names
-        :param manager: An instance of OpenAIManager
-        :param output_csv: Path to CSV output file
-        """
-        self.prompts = prompts
-        self.models = models
+        super().__init__(prompts, models, output_csv)
         self.manager = manager
-        self.output_csv = output_csv
-        self.results = []
 
     def run(self):
         for prompt in self.prompts:
@@ -48,13 +40,8 @@ class OpenAIModelBenchmark:
 
             self.results.append(row)
 
-        self._write_csv()
+        self.write_csv(["Prompt"] + self.models + ["Combined"])
 
-    def _write_csv(self):
-        fieldnames = ["Prompt"] + self.models + ["Combined"]
-        with open(self.output_csv, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(self.results)
+
 
    
