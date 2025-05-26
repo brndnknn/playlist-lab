@@ -106,19 +106,6 @@ class ModelBenchmark(BaseBenchmark):
         """
         Write results to CSV.
         """
-        # with open(self.output_csv, "w", newline="", encoding="utf-8") as csvfile:
-        #     fieldnames = [
-        #         "model",
-        #         "prompt",
-        #         "runtime_sec",
-        #         "output",
-        #         "tracks_parsed",
-        #         "tracks_found",
-        #         "check_results"
-        #     ]
-        #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        #     writer.writeheader()
-        #     writer.writerows(self.results)
 
         fieldnames = [
             "model",
@@ -235,19 +222,10 @@ class ModelBenchmark(BaseBenchmark):
         if not isinstance(input_text, str):
             return (0, 0, 'Bad model response')
 
-        try:
-            playlist = json.loads(input_text)
+        playlist = self.validate_json(input_text)
 
-        except json.JSONDecodeError:
-            print('fixing JSON array', input_text)
-            fixed_text = extract_array(input_text[1:])
-            try:
-                playlist = json.loads(fixed_text)
-                
-            except json.JSONDecodeError:
-                print("JSON error")
-                input_text = f"JSON ERROR \n {input_text}"
-                return (valid, total, input_text)
+        if not isinstance(playlist, list):
+            return (valid, total, playlist)
         
         start_time = time.time()
         for track in playlist:

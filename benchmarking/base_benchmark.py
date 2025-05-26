@@ -1,4 +1,6 @@
 import csv
+import json
+from utils.helpers import extract_array
 
 class BaseBenchmark:
     def __init__(self, prompts, models, output_csv):
@@ -13,3 +15,20 @@ class BaseBenchmark:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(self.results)
+
+    def validate_json(self, input_text):
+
+        try:
+            playlist = json.loads(input_text)
+
+        except json.JSONDecodeError:
+            fixed_text = extract_array(input_text[1:])
+            try:
+                playlist = json.loads(fixed_text)
+            except json.JSONDecodeError:
+                return f"JSON ERROR \n {input_text}"
+
+        return playlist
+
+        
+        

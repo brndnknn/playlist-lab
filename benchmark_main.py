@@ -14,7 +14,7 @@ def main():
     # list of models to test
     models_to_test = [
         'gemma2:2b',
-        'llama3.2:latest',
+        # 'llama3.2:latest',
         # 'gemma3:latest',
         # 'llama3.2:3b-instruct-q8_0',
         # 'mistral:latest',

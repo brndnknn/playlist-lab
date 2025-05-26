@@ -17,20 +17,13 @@ class OpenAIModelBenchmark(BaseBenchmark):
                 try:
                     response = self.manager.get_response(prompt)
 
-                    try:
-                        playlist = json.loads(response)
-                    except json.JSONDecodeError:
-                        fixed_response = extract_array(response[1:])
-                        try:
-                            playlist = json.loads(fixed_response)
-                        except json.JSONDecodeError:
-                            print("JSON ERROR")
-                            row[model] = "JSON ERROR"
+                    playlist = self.validate_json(response)
 
                     print(playlist)
                     row[model] = json.dumps(playlist, ensure_ascii=False)
-                    for song in playlist:
-                        unique_songs.add((song['title'].strip(), song['artist'].strip()))
+                    if isinstance(playlist, list):
+                        for song in playlist:
+                            unique_songs.add((song['title'].strip(), song['artist'].strip()))
 
                 except Exception as e:
                     row[model] = f"ERROR: {str(e)}"
