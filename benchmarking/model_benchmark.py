@@ -13,7 +13,7 @@ class ModelBenchmark(BaseBenchmark):
     Runs a series of benchmarks by prompting various Ollama models and measuring performance (speed, track validity, etc.).
     """
     def __init__(self, models, prompts, output_csv, spotify_client):
-        super().__init__(prompts, models, output_csv)
+        super().__init__(prompts, models, output_csv, spotify_client)
 
  
         self.results = []
@@ -53,8 +53,9 @@ class ModelBenchmark(BaseBenchmark):
             # Log/print
             print(f"Time taken: {runtime:.2f} seconds")
             
-            valid_tracks , total_tracks, check_results = self.__validate_tracks(response)
+            playlist = self.validate_json(response)
 
+            valid_tracks, total_tracks, check_results = self.validate_tracks(playlist)
             
             # print(f"Model output:\n{json_output}\n")
             print(f"Tracks parsed: {total_tracks}, tracks found on Spotify: {valid_tracks}")
@@ -201,44 +202,4 @@ class ModelBenchmark(BaseBenchmark):
 
 
 
-    def __validate_tracks(self, input_text):
-        """
-        Parses the raw model output and verifies each track 
-        against the SpotifyClient.
 
-        Args:
-            output_text (str): The text returned by the LLM, 
-                               typically lines of \"Title\" - Artist.
-
-        Returns:
-            tuple: (valid_count, total_count) indicating how many 
-                   tracks were actually found vs. total lines parsed.
-        """
-
-        total = 0
-        valid = 0
-        output_text = ""
-
-        if not isinstance(input_text, str):
-            return (0, 0, 'Bad model response')
-
-        playlist = self.validate_json(input_text)
-
-        if not isinstance(playlist, list):
-            return (valid, total, playlist)
-        
-        start_time = time.time()
-        for track in playlist:
-            if has_keys(track, "title", "artist"):
-                title = track["title"]
-                artist = track["artist"]
-                total += 1
-                results = self.spotify_client.track_exists(title, artist)
-                if results[0] == True:
-                    valid += 1
-                output_text = output_text + results[1] + '\n'
-        end_time = time.time()
-        run_time = end_time - start_time
-        print(f"Validation time: {run_time:.2f}")
-        
-        return (valid, total, output_text)
