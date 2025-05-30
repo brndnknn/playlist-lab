@@ -2,6 +2,8 @@ import os
 from benchmarking.openai_benchmark import OpenAIModelBenchmark
 from dotenv import load_dotenv
 from playlist_generation.OpenAIManager import OpenAIManager
+from api_clients.token_handler import TokenHandler
+from api_clients.spotify_client import SpotifyClient
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
@@ -21,7 +23,7 @@ def main():
         # "Playlist for Sherlock Holmes solving the case of missing socks",
         # "The robot uprising’s battle playlist (but it’s all disco)",
         # "Music for dramatically flipping through magazines in waiting rooms",
-        "Playlist for aliens first encountering human pizza",
+        "Playlist for aliens trying human pizza for the first time",
         "What music plays in Shrek’s mind while he's meditating",
         # "Songs to listen to while seductively making a sandwich"
     ]
@@ -34,7 +36,17 @@ def main():
 
 
     manager = OpenAIManager(api_key)
-    benchmark = OpenAIModelBenchmark(prompts, models, manager, "openai_benchmark_results.csv")
+    csv_file_path = "openai_benchmark_results.csv"
+    
+    token_handler = TokenHandler()
+    token = token_handler.load_token()
+
+    spotify_client = SpotifyClient(token)
+
+
+    benchmark = OpenAIModelBenchmark(prompts, models,
+                                     manager, csv_file_path,
+                                     spotify_client)
     benchmark.run()
 
 
