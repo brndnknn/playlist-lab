@@ -16,7 +16,7 @@ class OpenAIModelBenchmark(BaseBenchmark):
 
             for model in self.models:
                 try:
-                    response = self.manager.get_response(prompt)
+                    response, usage = self.manager.get_response(prompt, model)
 
                     playlist = self.validate_json(response)
 
@@ -29,6 +29,10 @@ class OpenAIModelBenchmark(BaseBenchmark):
                     row[model + ' - tracks_found'] = valid
                     row[model + ' - check_results'] = output_text
 
+                    row[model + ' - input_tokens'] = usage.input_tokens
+                    row[model + ' - output_tokens'] = usage.output_tokens
+                    row[model + ' - total_tokens'] = usage.total_tokens
+
 
                     if isinstance(playlist, list):
                         for song in playlist:
@@ -38,13 +42,13 @@ class OpenAIModelBenchmark(BaseBenchmark):
                 except Exception as e:
                     row[model] = f"ERROR: {str(e)}"
             
-            combined = [{"title": t, "artist": a} for (t, a) in sorted(unique_songs)]
-            valid, total, output_text = self.validate_tracks(combined)
+            # combined = [{"title": t, "artist": a} for (t, a) in sorted(unique_songs)]
+            # valid, total, output_text = self.validate_tracks(combined)
 
-            row["Combined"] = json.dumps(combined, indent=2, ensure_ascii=False)
-            row["Combined - tracks_parsed"] = total
-            row["Combined - tracks_found"] = valid
-            row["Combined - output_text"] = output_text
+            # row["Combined"] = json.dumps(combined, indent=2, ensure_ascii=False)
+            # row["Combined - tracks_parsed"] = total
+            # row["Combined - tracks_found"] = valid
+            # row["Combined - output_text"] = output_text
             
 
             self.results.append(row)

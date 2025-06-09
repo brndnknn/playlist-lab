@@ -11,7 +11,7 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 def main():
     prompts = [
-        # "Playlist for aliens trying to blend in at a human barbecue",
+        "Playlist for aliens trying to blend in at a human barbecue",
         # "The Joker’s grocery shopping playlist",
         # "Songs your microwave would choose if it gained sentience",
         # "Music for awkward elevator rides with strangers",
@@ -23,14 +23,16 @@ def main():
         # "Playlist for Sherlock Holmes solving the case of missing socks",
         # "The robot uprising’s battle playlist (but it’s all disco)",
         # "Music for dramatically flipping through magazines in waiting rooms",
-        "Playlist for aliens trying human pizza for the first time",
-        "What music plays in Shrek’s mind while he's meditating",
+        # "Playlist for aliens trying human pizza for the first time",
+        # "What music plays in Shrek’s mind while he's meditating",
         # "Songs to listen to while seductively making a sandwich"
     ]
 
     models = [
         "gpt-4.1",
+        "gpt-4.1-mini",
         "gpt-4o",
+        "gpt-4o-mini",
         "gpt-4.5-preview"
     ]
 

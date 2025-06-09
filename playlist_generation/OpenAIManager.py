@@ -21,5 +21,7 @@ class OpenAIManager:
             input=prompt
         )
 
+
         print(response.model)
-        return response.output_text
+
+        return response.output_text, response.usage
