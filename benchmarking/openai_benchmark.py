@@ -16,13 +16,15 @@ class OpenAIModelBenchmark(BaseBenchmark):
 
             for model in self.models:
                 try:
-                    response, usage = self.manager.get_response(prompt, model)
+                    freeform_response, usage = self.manager.get_response(prompt)
+                    json_response = self.manager.convert_to_json(freeform_response)
 
-                    playlist = self.validate_json(response)
+                    playlist = self.validate_json(json_response)
 
                     valid, total, output_text = self.validate_tracks(playlist)
 
                     print(playlist)
+                    row[model + ' - raw_text'] = freeform_response
                     row[model] = json.dumps(playlist, indent=2, ensure_ascii=False)
 
                     row[model + ' - tracks_parsed'] = total

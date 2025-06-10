@@ -8,9 +8,14 @@ class OpenAIManager:
         self.client = OpenAI(api_key = api_key)
         self.system_prompt = (
             "You are an AI DJ. Given a creative theme or scenario, "
-            "return a playlist of only real songs in JSON format "
-            "with each song having a title and an artist."
+            "return a playlist of only real songs, with each song "
+            "having a title and an artist."
         )
+        self.alt_sys_prompt = (
+                "Convert the given playlist of songs into a list in JSON format. "
+                "Each item should be an object with keys 'title' and 'artist'. "
+                "Only include songs contained in the prompt."
+            )
 
     def get_response(self, prompt, model_name=None):
         model = model_name if model_name is not None else self.model
@@ -21,7 +26,15 @@ class OpenAIManager:
             input=prompt
         )
 
-
-        print(response.model)
-
         return response.output_text, response.usage
+
+    def convert_to_json(self, prompt):
+
+        response = self.client.responses.create(
+            model=self.model,
+            temperature=self.temperature,
+            instructions=self.alt_sys_prompt,
+            input=prompt
+        )
+
+        return response.output_text
