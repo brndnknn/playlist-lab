@@ -1,5 +1,6 @@
 import json
 import csv
+import time
 from utils.helpers import has_keys, extract_array
 from benchmarking.base_benchmark import BaseBenchmark
 
@@ -16,7 +17,12 @@ class OpenAIModelBenchmark(BaseBenchmark):
 
             for model in self.models:
                 try:
+
+                    start_time = time.time()
                     freeform_response, usage = self.manager.get_response(prompt)
+                    runtime = time.time() - start_time
+
+
                     json_response = self.manager.convert_to_json(freeform_response)
 
                     playlist = self.validate_json(json_response)
@@ -26,6 +32,7 @@ class OpenAIModelBenchmark(BaseBenchmark):
                     print(playlist)
                     row[model + ' - raw_text'] = freeform_response
                     row[model] = json.dumps(playlist, indent=2, ensure_ascii=False)
+                    row[model + ' - runtime'] = f"{runtime:.2f}"
 
                     row[model + ' - tracks_parsed'] = total
                     row[model + ' - tracks_found'] = valid
