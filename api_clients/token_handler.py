@@ -1,3 +1,21 @@
+"""
+Spotify Token Handler
+=====================
+
+Utility class that obtains, persists, and refreshes Spotify Web API
+access tokens via the *Client Credentials* flow. A valid token is cached
+locally in `token.json` (alongside an `expires_at` timestamp) to minimize
+unnecessary network calls.
+
+Environment variables required
+------------------------------
+SPOTIFY_CLIENT_ID      — Spotify application client-ID  
+SPOTIFY_CLIENT_SECRET  — Spotify application client-secret
+
+All methods are synchronous and depend only on the `requests` package.
+"""
+
+
 import requests
 import base64
 import os
@@ -62,7 +80,7 @@ class TokenHandler:
 
         Args:
             token (dict): The token data received from Spotify.
-            current_time (float): The current Unix epoch time.
+            time (float): The current Unix epoch time.
         """
         token_time = token["expires_in"] + time
         token["expires_at"] = token_time
@@ -73,6 +91,7 @@ class TokenHandler:
     def check_token(self, token):
         """
         Checks if the given token is still valid.
+        A 60-second buffer is applied so that near-expiry tokens are treated as invalid.
 
         Args:
             token (dict): The token data from file.
@@ -89,7 +108,8 @@ class TokenHandler:
     
     def load_token(self):
         """
-        Loads a valid token from the local file if it exists and is still valid. Otherwise, request a new token and saves it.
+        Loads a valid token from the local file if it exists and is still valid. 
+        Otherwise, request a new token and saves it.
         
         Returns:
             dict: The valid token data (includes 'access_token).
