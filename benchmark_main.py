@@ -1,14 +1,46 @@
+"""
+PlaylistGenAI — Ollama Benchmark Runner
+=======================================
+
+Command-line entry point that benchmarks one or more locally hosted
+Ollama LLM models against a curated list of playlist prompts.  
+For every *(model, prompt)* pair it measures and records:
+
+* End-to-end generation latency
+* JSON-format correctness of the model output
+* Real-world track coverage via live Spotify look-ups
+
+Key collaborators
+-----------------
+• **TokenHandler** – acquires/caches Spotify API tokens  
+• **SpotifyClient** – validates that each suggested track exists on Spotify  
+• **ModelBenchmark** – orchestrates prompts, collects metrics,  
+  and writes *ollama_benchmark_results.csv*
+
+Run this file directly to regenerate the CSV and console-print progress.
+"""
+
+
+
 from benchmarking.model_benchmark import ModelBenchmark
 from api_clients.token_handler import TokenHandler
 from api_clients.spotify_client import SpotifyClient
 
 def main():
-    """
-    Main entry point to run the LLM model benchmarks with 
-    specified models and prompts.
+    """Run the full Ollama model benchmark matrix.
 
-    Loads a valid Spotify API token, constructs the SpotifyClient
-    and ModelBenchmark classes, and runs the benchmarks.
+    Workflow
+    --------
+    1. Define `models_to_test` and `prompts_to_test`.
+    2. Fetch or refresh a Spotify token with :class:`TokenHandler`.
+    3. Build a :class:`SpotifyClient` for per-track validation.
+    4. Instantiate :class:`ModelBenchmark` and invoke
+       :py:meth:`ModelBenchmark.run_benchmarks`.
+    5. Persist detailed rows **plus** model/prompt summaries to
+       *ollama_benchmark_results.csv*.
+
+    All heavy lifting happens inside :class:`ModelBenchmark`; this
+    function simply wires the components together.
     """
     
     # list of models to test

@@ -1,3 +1,22 @@
+"""
+PlaylistGenAI — OpenAI Benchmark Entrypoint
+==========================================
+
+Benchmarks several OpenAI-hosted models (e.g. *gpt-4.1*, *gpt-4o*) on a
+set of whimsical playlist prompts. For each run it captures:
+
+* Raw free-form text from the LLM
+* JSON-ified playlist after post-processing via :class:`OpenAIManager`
+* Latency and token-usage metrics
+* Track-existence statistics validated against Spotify
+
+Outputs are written to *openai_benchmark_results.csv* along with
+per-model and per-prompt aggregate summaries.
+
+Prerequisite: environment variable **OPENAI_API_KEY** must be set.
+"""
+
+
 import os
 from benchmarking.openai_benchmark import OpenAIModelBenchmark
 from dotenv import load_dotenv
@@ -10,6 +29,26 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 
 def main():
+    """Kick off OpenAI playlist-generation benchmarks.
+
+    Steps
+    -----
+    1. Assemble a list of 15 humorous test prompts.
+    2. Specify which OpenAI model IDs to evaluate.
+    3. Create helper objects:
+       • :class:`OpenAIManager`    wraps the OpenAI Python SDK  
+       • :class:`TokenHandler`     obtains a Spotify token  
+       • :class:`SpotifyClient`    verifies each suggested track
+    4. Instantiate :class:`OpenAIModelBenchmark` and call :py:meth:`run`
+       to generate *openai_benchmark_results.csv*.
+
+    Notes
+    -----
+    • Assumes sufficient OpenAI quota for all selected models.  
+    • Exits normally after the CSV (with summary sections) is written.
+    """
+
+    
     prompts = [
         "Playlist for aliens trying to blend in at a human barbecue",
         "The Joker’s grocery shopping playlist",
