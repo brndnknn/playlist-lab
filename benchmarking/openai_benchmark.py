@@ -1,3 +1,10 @@
+"""
+Runs benchmarks for OpenAI LLMs on playlist generation prompts.
+
+Generates playlists, collects metrics, validates tracks, and writes detailed
+and summary results to CSV.
+"""
+
 import json
 import csv
 import time
@@ -6,11 +13,24 @@ from benchmarking.base_benchmark import BaseBenchmark
 
 class OpenAIModelBenchmark(BaseBenchmark):
     def __init__(self, prompts, models, manager, output_csv, spotify_client):
+       """
+        Initializes the OpenAIModelBenchmark.
+
+        Args:
+            prompts (list): List of prompt strings.
+            models (list): List of OpenAI model names.
+            manager (OpenAIManager): For calling OpenAI models.
+            output_csv (str): Path to output CSV.
+            spotify_client (SpotifyClient): For validating tracks.
+        """
         super().__init__(prompts, models, output_csv, spotify_client)
         self.manager = manager
         
 
     def run(self):
+        """
+        Runs the OpenAI playlist generation benchmarks and writes results to CSV.
+        """
         for prompt in self.prompts:
             row = {"Prompt": prompt}
             unique_songs = set()

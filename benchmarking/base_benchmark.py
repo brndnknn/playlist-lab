@@ -1,9 +1,25 @@
+"""
+Base class for benchmarking LLMs on playlist generation tasks.
+
+Provides common methods for running prompts, writing CSV results,
+validating JSON outputs, and checking playlist tracks against Spotify.
+"""
+
 import csv
 import json
 from utils.helpers import extract_array, has_keys
 
 class BaseBenchmark:
     def __init__(self, prompts, models, output_csv, spotify_client):
+        """
+        Initializes the BaseBenchmark with prompts, models, and I/O configuration.
+
+        Args:
+            prompts (list): List of playlist prompt strings.
+            models (list): List of model names to benchmark.
+            output_csv (str): Path to the output CSV file.
+            spotify_client (SpotifyClient): Instance for validating tracks on Spotify.
+        """
         self.prompts = prompts
         self.models = models
         self.output_csv = output_csv
@@ -11,14 +27,27 @@ class BaseBenchmark:
         self.results = []
 
     def write_csv(self, fieldnames):
-        
+        """
+        Writes benchmark results to a CSV file.
+
+        Args:
+            fieldnames (list): List of CSV column headers.
+        """
         with open(self.output_csv, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(self.results)
 
     def validate_json(self, input_text):
+        """
+        Attempts to load and repair a playlist from a JSON string.
 
+        Args:
+            input_text (str): The model's raw output string.
+
+        Returns:
+            object: Parsed playlist object (list or error string).
+        """
         try:
             playlist = json.loads(input_text)
 
@@ -32,6 +61,15 @@ class BaseBenchmark:
         return playlist
 
     def validate_tracks(self, playlist):
+        """
+        Checks if each track in the playlist exists on Spotify.
+
+        Args:
+            playlist (list): List of track dicts with 'title' and 'artist'.
+
+        Returns:
+            tuple: (int valid, int total, str output_text)
+        """
         valid, total = 0, 0
         output_text = ""
 

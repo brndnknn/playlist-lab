@@ -1,3 +1,10 @@
+"""
+Runs benchmarks for Ollama LLMs by generating playlists from prompts.
+
+Handles timing, result parsing, track validation, and writing detailed and summary
+results to CSV for later analysis.
+"""
+
 import subprocess
 import time
 import csv
@@ -10,17 +17,29 @@ from benchmarking.base_benchmark import BaseBenchmark
 
 class ModelBenchmark(BaseBenchmark):
     """
-    Runs a series of benchmarks by prompting various Ollama models and measuring performance (speed, track validity, etc.).
+    Runs a series of benchmarks by prompting various Ollama models 
+    and measuring performance (speed, track validity, etc.).
     """
     def __init__(self, models, prompts, output_csv, spotify_client):
+         """
+        Initializes the ModelBenchmark with models, prompts, output CSV, and Spotify client.
+
+        Args:
+            models (list): List of Ollama model names.
+            prompts (list): List of prompt strings.
+            output_csv (str): Path to the output CSV.
+            spotify_client (SpotifyClient): For validating tracks.
+        """
         super().__init__(prompts, models, output_csv, spotify_client)
 
- 
         self.results = []
         self.llm_manager = OllamaManager()
         self.spotify_client = spotify_client
 
     def run_benchmarks(self):
+        """
+        Runs the benchmark test for all (model, prompt) pairs and writes results to CSV.
+        """
         for model in self.models:
             print(f'Starting model {model}')
             if not self.llm_manager.is_ollama_running(model):
@@ -93,8 +112,15 @@ class ModelBenchmark(BaseBenchmark):
             self.results.append(result)
 
     def is_valid_json_playlist(self, output):
-        """Returns True if the output is valid JSON representing a playlist:
-        a list of at least 5 objects with keys 'title' and 'artist'."""
+        """
+        Checks if the output string is valid JSON representing a playlist.
+
+        Args:
+            output (str): The JSON string to check.
+
+        Returns:
+            bool: True if output is a list of at least 5 dicts with 'title' and 'artist'.
+        """
         try:
             parsed = json.loads(output)
             if isinstance(parsed, list) and len(parsed) >= 5:
@@ -105,7 +131,7 @@ class ModelBenchmark(BaseBenchmark):
 
     def __write_csv(self):
         """
-        Write results to CSV.
+        Writes all benchmark results and summaries to CSV.
         """
 
         fieldnames = [
