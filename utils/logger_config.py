@@ -1,3 +1,9 @@
+"""
+Logger configuration for playlistGenAI.
+
+Sets up a logger for both console and file output with INFO and DEBUG levels.
+"""
+
 import logging
 import sys
 

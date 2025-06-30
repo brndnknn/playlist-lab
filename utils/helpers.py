@@ -1,8 +1,23 @@
+"""
+Helper functions for making HTTP requests and parsing model output.
+
+Includes JSON array extraction, key checking, and logged HTTP requests.
+"""
+
 import requests
 from utils.logger_config import logger
 
 
 def extract_array(text):
+    """
+    Extracts and returns the first JSON array substring from text. 
+
+    Args:
+        text (str): String potentially containing a JSON array.
+    
+    Returns:
+        str: The extracted JSON array or original text if not found.
+    """
     start_index = text.find('[')
     end_index = text.find(']')
 
@@ -12,6 +27,17 @@ def extract_array(text):
     return text[start_index:end_index + 1]
 
 def has_keys(obj, key1, key2):
+    """
+    Checks if a dict contains both keys.
+
+    Args:
+        obj (dict): The dictionary to check.
+        key1 (str): First key to check.
+        key2 (str): Second key to check.
+
+    Returns:
+        bool: True if both keys are present.
+    """
     if not isinstance(obj, dict):
         return False 
     return key1 in obj and key2 in obj
@@ -22,12 +48,15 @@ def logged_request(method, url, **kwargs):
     Makes an HTTP request and logs detailed request/response info.
 
     Args:
-        method (str): 'GET', 'POST', etc.
+        method (str): HTTP method 'GET', 'POST', etc.
         url (str): Full URL to request.
         **kwargs: Another keyword arguments for requests.request.
 
     Returns:
-        requsets.Response: The HTTP response object.
+        requests.Response: The HTTP response object.
+    
+    Raises:
+        requests.RequestException: If the request fails.
     """
 
     try:
