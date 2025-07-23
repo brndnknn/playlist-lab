@@ -21,7 +21,7 @@ class ModelBenchmark(BaseBenchmark):
     and measuring performance (speed, track validity, etc.).
     """
     def __init__(self, models, prompts, output_csv, spotify_client):
-         """
+        """
         Initializes the ModelBenchmark with models, prompts, output CSV, and Spotify client.
 
         Args:

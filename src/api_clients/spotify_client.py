@@ -80,4 +80,3 @@ class SpotifyClient:
         except Exception as e:
             logger.error(f"HTTP Error {e}, skipping this track")
             return [False, f"HTTP Error while searching for {title}, {artist}."]
-

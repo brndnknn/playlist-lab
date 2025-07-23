@@ -13,7 +13,7 @@ from benchmarking.base_benchmark import BaseBenchmark
 
 class OpenAIModelBenchmark(BaseBenchmark):
     def __init__(self, prompts, models, manager, output_csv, spotify_client):
-       """
+        """
         Initializes the OpenAIModelBenchmark.
 
         Args:
