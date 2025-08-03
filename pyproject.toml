@@ -3,7 +3,15 @@ name = "playlist-evaluator"
 version ="0.1.0"
 description = "Evaluate LLM-generated playlists based on prompt alignment, cohesion, and cleverness"
 authors = [{name = "brndnknn"}]
-dependencies = []
+dependencies = [
+    "openai",
+    "requests",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
 
 [build-system]
 requires = ["setuptools", "wheel"]
