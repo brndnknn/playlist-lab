@@ -1,15 +1,19 @@
+from evaluator.models import Track, PlaylistInput, ScoreComponent, EvaluationResult
 import pytest
 
 # Track
 
 def test_track_creation():
     # test that a track data object can be created with title and artist attributes 
-     pytest.fail("Not implemented yet")
+     track = Track(title="Song Title", artist="Artist Name")
+     assert track.title == "Song Title"
+     assert track.artist == "Artist Name"
 
 
 def test_track_invalid_type():
     # test that values of incorrect type raise validation error
-    pytest.fail("Not implemented yet")
+    with pytest.raises(ValueError):
+        Track(title=123, artist="Queen")
 
 
 # PlaylistInput 
