@@ -1,6 +1,7 @@
 from evaluator.models import Track, PlaylistInput, ScoreComponent, EvaluationResult
 from pydantic import ValidationError
 import pytest
+import json
 
 # Track
 
@@ -58,38 +59,123 @@ def test_playlist_input_with_invalid_track():
 
 def test_score_component_creation():
     # test that a score component can be created with name, value, and max_value
-    pytest.fail("Not implemented yet")
+    sc = ScoreComponent(name="Prompt Alignment", value=7.5, max_value=10.0)
+    assert sc.name == "Prompt Alignment"
+    assert isinstance(sc.value, float)
+    assert sc.value == 7.5
+    assert sc.max_value == 10.0
 
 
 def test_score_component_invalid_type():
     # test that passing non-floats for value or max_value raises a validation error
-    pytest.fail("Not implemented yet")
+    with pytest.raises(ValidationError) as e1:
+        ScoreComponent(name="Cohesion", value="abc", max_value=10.0)  # not coercible to float
+    errs1 = e1.value.errors()
+    assert any(err["loc"] == ("value",) for err in errs1)
 
+    with pytest.raises(ValidationError) as e2:
+        ScoreComponent(name="Humor", value=5.0, max_value="xyz")  # not coercible to float
+    errs2 = e2.value.errors()
+    assert any(err["loc"] == ("max_value",) for err in errs2)
 
 # EvaluationResult 
 
 def test_evaluation_result_creation():
     # test that an evaluation result can be created with 
     # prompt, score, score components, and track list
-    pytest.fail("Not implemented yet")
+    tracks = [
+        Track(title="Starman", artist="David Bowie"),
+        Track(title="Life on Mars?", artist="David Bowie"),
+    ]
+    components = [
+        ScoreComponent(name="Alignment", value=8.0, max_value=10.0),
+        ScoreComponent(name="Cohesion", value=7.0, max_value=10.0),
+        ScoreComponent(name="Humor", value=6.0, max_value=10.0),
+    ]
+
+    res = EvaluationResult(
+        prompt="Darth Vader's tea party",
+        overall_score=73.2,
+        components=components,
+        evaluated_tracks=tracks,
+    )
+
+    assert res.prompt.startswith("Darth Vader")
+    assert isinstance(res.overall_score, float)
+    assert len(res.components) == 3
+    assert len(res.evaluated_tracks) == 2
+    assert res.components[0].name == "Alignment"
+    assert res.evaluated_tracks[0].title == "Starman"
 
 
 def test_evaluation_result_invalid_score_component():
     # test that an invalid score component raises a validation error
-    pytest.fail("Not implemented yet")
+    tracks = [Track(title="Starman", artist="David Bowie")]
+    bad_components = [
+        ScoreComponent(name="Alignment", value=8.0, max_value=10.0),
+        123,  # invalid entry
+    ]
+
+    with pytest.raises(ValidationError) as e:
+        EvaluationResult(
+            prompt="Darth Vader's tea party",
+            overall_score=70.0,
+            components=bad_components,
+            evaluated_tracks=tracks,
+        )
+    errs = e.value.errors()
+    # Expect an error located under ("components", <index>)
+    assert any(err["loc"][0] == "components" and isinstance(err["loc"][1], int) for err in errs)
+
 
 
 def test_evaluation_result_invalid_track_list():
     # test that an invalid track in evaluated_tracks raises a validation error
-    pytest.fail("Not implemented yet")
+    bad_tracks = [Track(title="Starman", artist="David Bowie"), 999]
+
+    with pytest.raises(ValidationError) as e:
+        EvaluationResult(
+            prompt="Darth Vader's tea party",
+            overall_score=70.0,
+            components=[ScoreComponent(name="Alignment", value=8.0, max_value=10.0)],
+            evaluated_tracks=bad_tracks,
+        )
+    errs = e.value.errors()
+    # Expect an error located under ("evaluated_tracks", <index>)
+    assert any(err["loc"][0] == "evaluated_tracks" and isinstance(err["loc"][1], int) for err in errs)
+
 
 
 def test_evaluation_result_serialization_to_dict():
     # test that calling .dict() on an EvaluationResult returns a valid dictionary
-    pytest.fail("Not implemented yet")
+    res = EvaluationResult(
+        prompt="Darth Vader's tea party",
+        overall_score=75.0,
+        components=[ScoreComponent(name="Alignment", value=8.0, max_value=10.0)],
+        evaluated_tracks=[Track(title="Starman", artist="David Bowie")],
+    )
+    as_dict = res.model_dump()
+    assert isinstance(as_dict, dict)
+    assert as_dict["prompt"] == "Darth Vader's tea party"
+    assert isinstance(as_dict["components"], list)
+    assert isinstance(as_dict["evaluated_tracks"], list)
+    assert as_dict["components"][0]["name"] == "Alignment"
+    assert as_dict["evaluated_tracks"][0]["artist"] == "David Bowie"
 
 
 def test_evaluation_result_serialization_to_json():
     # test that calling .json() returns a valid JSON string
-    pytest.fail("Not implemented yet")
+    from evaluator.models import EvaluationResult, ScoreComponent, Track
+    res = EvaluationResult(
+        prompt="Darth Vader's tea party",
+        overall_score=75.0,
+        components=[ScoreComponent(name="Alignment", value=8.0, max_value=10.0)],
+        evaluated_tracks=[Track(title="Starman", artist="David Bowie")],
+    )
+    s = res.model_dump_json()  # <-- v2
+    data = json.loads(s)
+    assert isinstance(s, str)
+    assert data["prompt"] == "Darth Vader's tea party"
+    assert data["components"][0]["max_value"] == 10.0
+    assert data["evaluated_tracks"][0]["title"] == "Starman"
 
