@@ -1,4 +1,5 @@
 from evaluator.models import Track, PlaylistInput, ScoreComponent, EvaluationResult
+from pydantic import ValidationError
 import pytest
 
 # Track
@@ -20,23 +21,38 @@ def test_track_invalid_type():
 
 def test_playlist_input_creation():
     # test that playlist can be created with a prompt and a list of Track objects
-    pytest.fail("Not implemented yet")
+    tracks = [Track(title="Imagine", artist="John Lennon")]
+    playlist = PlaylistInput(prompt="Songs for peace", tracks=tracks)
+    assert playlist.prompt == "Songs for peace"
+    assert isinstance(playlist.tracks, list)
+    assert len(playlist.tracks) == 1
+    assert playlist.tracks[0].title == "Imagine"
+    assert playlist.tracks[0].artist == "John Lennon"
 
 
 def test_playlist_input_requires_prompt():
     # test that missing prompt raises a validation error
-    pytest.fail("Not implemented yet")
-
+    tracks = [Track(title="Bicycle Race", artist="Queen")]
+    with pytest.raises(ValidationError) as e:
+        PlaylistInput(tracks=tracks) # no prompt provided
+    errs = e.value.errors()
+    assert any(err["loc"] == ("prompt",) and err["type"] == "missing" for err in errs)
 
 def test_playlist_input_requires_track_list():
     # test that missing or null track list raises a validation error
-    pytest.fail("Not implemented yet")
-
+    with pytest.raises(ValidationError) as e:
+        PlaylistInput(prompt="Silent disco", tracks=None)
+    errs = e.value.errors()
+    assert any(err["loc"] == ("tracks",) and err["type"] == "list_type" for err in errs)
 
 def test_playlist_input_with_invalid_track():
-    # test that a playlist with a non-Track object in the track list raises a validation error
-    pytest.fail("Not implemented yet")
-
+    # test that a playlist with a non-Track object in the track list raises a validation erro
+    bad_tracks = [{"title": "Hey Jude", "artist": "The Beatles"}, 123]
+    with pytest.raises(ValidationError) as e:
+        PlaylistInput(prompt="Beatles greatest", tracks=bad_tracks)
+    errs = e.value.errors()
+    # Expect errors for each invalid item in the list (index 1 for the int, maybe index 0 if dict isn't a Track)
+    assert any(err["loc"][0] == "tracks" and isinstance(err["loc"][1], int) for err in errs)
 
 # ScoreComponent
 
