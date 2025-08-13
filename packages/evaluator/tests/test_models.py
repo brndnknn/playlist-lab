@@ -165,7 +165,6 @@ def test_evaluation_result_serialization_to_dict():
 
 def test_evaluation_result_serialization_to_json():
     # test that calling .json() returns a valid JSON string
-    from evaluator.models import EvaluationResult, ScoreComponent, Track
     res = EvaluationResult(
         prompt="Darth Vader's tea party",
         overall_score=75.0,

@@ -1,0 +1,16 @@
+# output files
+*.csv
+*.log
+
+# API access
+token.json
+.env
+
+# libraries and compilation files
+__pycache__/
+.venv/
+*.egg-info/
+.pytest_cache
+
+# system files
+.DS_Store

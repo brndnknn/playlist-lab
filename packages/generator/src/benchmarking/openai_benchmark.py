@@ -6,7 +6,6 @@ and summary results to CSV.
 """
 
 import json
-import csv
 import time
 from utils.helpers import has_keys, extract_array
 from benchmarking.base_benchmark import BaseBenchmark
@@ -39,7 +38,7 @@ class OpenAIModelBenchmark(BaseBenchmark):
                 try:
 
                     start_time = time.time()
-                    freeform_response, usage = self.manager.get_response(prompt)
+                    freeform_response, usage = self.manager.get_response(prompt, model)
                     runtime = time.time() - start_time
 
 

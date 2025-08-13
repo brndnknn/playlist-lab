@@ -1,24 +1,25 @@
 [build-system]
-requires = ["setuptools>=61", "wheel"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "playlistGenAI"
+name = "playlist-genai"
 version = "0.1.0"
-description = "LLM generated playlist builder"
-authors = [{name = "brndnknn"}]
-readme = "README.md"
+description = "LLM-generated playlist builder + benchmarks"
 requires-python = ">=3.10"
-
 dependencies = [
-    
+  "openai>=1.0.0",
+  "requests>=2.32.0",
+  "python-dotenv>=1.0.0",
+  "tqdm>=4.0.0",
 ]
 
 [project.optional-dependencies]
-dev =[
-    "pytest",
-    "black",
-]
+dev = ["pytest", "black"]
 
-[tool.setuptools]
-package-dir = {"" = "src"}
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+playlist-openai-bench = "openai_api_main:main"
+playlist-ollama-bench = "benchmark_main:main"

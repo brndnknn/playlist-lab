@@ -55,31 +55,21 @@ def main():
 
     # list of prompts to test
     prompts_to_test = [
-
-        # Easy & Straightforward:
-        "Create a playlist of upbeat indie pop songs.",
-        "Generate a playlist with songs by artists known for their synth-pop sound.",
-        # "Give me a playlist with some classic rock anthems.",
-        # "I want a playlist with a chill vibe, mainly focusing on acoustic music.",
-        # "Suggest a playlist with songs by female vocalists."
-
-        # # Medium Complexity:
-        # "Generate a playlist that reflects a feeling of nostalgia for the 80s.",
-        # "Create a playlist with songs that are generally upbeat and energetic.",
-        # "Give me a playlist centered around the themes of heartbreak and loss.",
-        # "I'm looking for a playlist with a blend of electronic dance music and chillwave.",
-        # "Suggest a playlist that captures the feeling of a summer road trip.",
-
-
-        # # Advanced & Abstract (Good for checking nuance & creativity):
-        # "Imagine Napoleon Bonaparte was listening to Spotify in the 19th century. Create a playlist of songs he would have listend to while conquering the Alps",
-        # "Create a playlist evoking the atmosphere of a dimly lit jazz club in 1960s New Orleans. Include songs with a melancholic feel and soulful instrumentation.",
-        # "Design a playlist representing a journey through a digital dreamscape. Think neon colors, glitch effects, and fragmented melodies.",
-        # "Craft a playlist that embodies the spirit of cyberpunk - a blend of dark, atmospheric soundscapes, electronic rhythms, and gritty samples.",
-        # "Generate a playlist that simulates a rainy afternoon in a small European town, focusing on themes of introspection and quiet observation.",
-
-        # # Bonus - For really pushing the boundaries:**
-        # "Compose a playlist that tells the story of a lost lighthouse keeper, inspired by the isolation and beauty of the sea."
+        "Playlist for aliens trying to blend in at a human barbecue",
+        # "The Joker’s grocery shopping playlist",
+        # "Songs your microwave would choose if it gained sentience",
+        # "Music for awkward elevator rides with strangers",
+        # "Songs to pretend you're the main character in a rom-com",
+        # "Playlist for aggressively matching Tupperware lids",
+        # "Playlist for a wizard accidentally trapped in the modern world",
+        # "Songs you'd hear at a boring office birthday party",
+        # "Songs for cats secretly planning to overthrow humanity",
+        # "Playlist for Sherlock Holmes solving the case of missing socks",
+        # "The robot uprising’s battle playlist (but it’s all disco)",
+        # "Music for dramatically flipping through magazines in waiting rooms",
+        # "Playlist for aliens trying human pizza for the first time",
+        # "What music plays in Shrek’s mind while he's meditating",
+        # "Songs to listen to while seductively making a sandwich"
     ]
 
     csv_file_path = "ollama_benchmark_results.csv"

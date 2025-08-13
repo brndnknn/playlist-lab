@@ -22,6 +22,7 @@ import os
 import json
 import time
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
@@ -38,7 +39,7 @@ class TokenHandler:
         """
         self.client_id = os.environ.get("SPOTIFY_CLIENT_ID")
         self.client_secret = os.environ.get("SPOTIFY_CLIENT_SECRET")
-        self.token_file = "../token.json"
+        self.token_file = str(Path(__file__).resolve().parent.parent / "token.json")
         self.token = {}
 
 
