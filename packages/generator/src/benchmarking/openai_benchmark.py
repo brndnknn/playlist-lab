@@ -7,7 +7,7 @@ and summary results to CSV.
 
 import json
 import time
-from utils.helpers import has_keys, extract_array
+import itertools
 from benchmarking.base_benchmark import BaseBenchmark
 
 class OpenAIModelBenchmark(BaseBenchmark):
@@ -24,6 +24,27 @@ class OpenAIModelBenchmark(BaseBenchmark):
         """
         super().__init__(prompts, models, output_csv, spotify_client)
         self.manager = manager
+        self.effort = ["minimal", "low"]
+        self.verb = ["low"]
+
+        self.fieldnames = [
+            "prompt",
+            "model",
+            "effort",
+            "verbosity",
+            "raw_text",
+            "json",
+            "check_results",
+
+            "runtime",
+            "tracks_parsed",
+            "tracks_found",
+            
+            "input_tokens",
+            "output_tokens",
+            "total_tokens"
+
+        ]
         
 
     def run(self):
@@ -31,14 +52,12 @@ class OpenAIModelBenchmark(BaseBenchmark):
         Runs the OpenAI playlist generation benchmarks and writes results to CSV.
         """
         for prompt in self.prompts:
-            row = {"Prompt": prompt}
-            unique_songs = set()
-
-            for model in self.models:
+            for model, effort, verb in itertools.product(self.models, self.effort, self.verb):
+                row = {"prompt": prompt}
                 try:
 
                     start_time = time.time()
-                    freeform_response, usage = self.manager.get_response(prompt, model)
+                    freeform_response, usage = self.manager.get_response(prompt, model, effort, verb)
                     runtime = time.time() - start_time
 
 
@@ -49,35 +68,29 @@ class OpenAIModelBenchmark(BaseBenchmark):
                     valid, total, output_text = self.validate_tracks(playlist)
 
                     print(playlist)
-                    row[model + ' - raw_text'] = freeform_response
-                    row[model] = json.dumps(playlist, indent=2, ensure_ascii=False)
-                    row[model + ' - runtime'] = f"{runtime:.2f}"
+                    
+                    row["model"] = model
+                    row["effort"] = effort
+                    row["verbosity"] = verb
+                    row['raw_text'] = freeform_response
+                    row["json"] = json.dumps(playlist, indent=2, ensure_ascii=False)
+                    row['check_results'] = output_text
+                    
+                    row['runtime'] = f"{runtime:.2f}"
+                    row['tracks_parsed'] = total
+                    row['tracks_found'] = valid
+                    
 
-                    row[model + ' - tracks_parsed'] = total
-                    row[model + ' - tracks_found'] = valid
-                    row[model + ' - check_results'] = output_text
-
-                    row[model + ' - input_tokens'] = usage.input_tokens
-                    row[model + ' - output_tokens'] = usage.output_tokens
-                    row[model + ' - total_tokens'] = usage.total_tokens
-
-
-                    if isinstance(playlist, list):
-                        for song in playlist:
-                            
-                            unique_songs.add((song['title'].strip(), song['artist'].strip()))
+                    row['input_tokens'] = usage.input_tokens
+                    row['output_tokens'] = usage.output_tokens
+                    row['total_tokens'] = usage.total_tokens
 
                 except Exception as e:
-                    row[model] = f"ERROR: {str(e)}"
+                    row['model'] = f"ERROR: {str(e)}"
 
-            self.results.append(row)
+                self.results.append(row)
 
-        fieldnames = set()
-
-        for row in self.results:
-            fieldnames.update(row.keys())
-        fieldnames = ["Prompt"] + sorted(k for k in fieldnames if k != "Prompt")
-        self.write_csv(fieldnames)
+        self.write_csv(self.fieldnames)
 
 
 

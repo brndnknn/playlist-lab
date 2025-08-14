@@ -50,7 +50,8 @@ def main():
 
     
     prompts = [
-        "Playlist for aliens trying to blend in at a human barbecue",
+        "Darth Vader's tea party playlist",
+        # "Playlist for aliens trying to blend in at a human barbecue",
         # "The Joker’s grocery shopping playlist",
         # "Songs your microwave would choose if it gained sentience",
         # "Music for awkward elevator rides with strangers",
@@ -68,7 +69,7 @@ def main():
     ]
 
     models = [
-        "gpt-4.1-nano"
+        "gpt-5-nano"
     ]
 
 
