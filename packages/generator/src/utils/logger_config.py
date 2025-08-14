@@ -23,5 +23,5 @@ file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 
 logger.handlers.clear()
-logger.addHandler(console_handler)
+#logger.addHandler(console_handler)
 logger.addHandler(file_handler)

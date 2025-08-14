@@ -8,6 +8,7 @@ and summary results to CSV.
 import json
 import time
 import itertools
+from tqdm import tqdm
 from benchmarking.base_benchmark import BaseBenchmark
 
 class OpenAIModelBenchmark(BaseBenchmark):
@@ -51,44 +52,47 @@ class OpenAIModelBenchmark(BaseBenchmark):
         """
         Runs the OpenAI playlist generation benchmarks and writes results to CSV.
         """
-        for prompt in self.prompts:
-            for model, effort, verb in itertools.product(self.models, self.effort, self.verb):
-                row = {"prompt": prompt}
-                try:
+        total = len(self.prompts) * len(self.models) * len(self.effort) * len(self.verb)
 
-                    start_time = time.time()
-                    freeform_response, usage = self.manager.get_response(prompt, model, effort, verb)
-                    runtime = time.time() - start_time
+        with tqdm(total=total, desc="OpenAI benchmarks", unit="run", dynamic_ncols=True) as pbar:
+            for prompt in self.prompts:
+                for model, effort, verb in itertools.product(self.models, self.effort, self.verb):
+                    row = {"prompt": prompt}
+                    try:
+
+                        start_time = time.time()
+                        freeform_response, usage = self.manager.get_response(prompt, model, effort, verb)
+                        runtime = time.time() - start_time
 
 
-                    json_response = self.manager.convert_to_json(freeform_response)
+                        json_response = self.manager.convert_to_json(freeform_response)
 
-                    playlist = self.validate_json(json_response)
+                        playlist = self.validate_json(json_response)
 
-                    valid, total, output_text = self.validate_tracks(playlist)
+                        valid, total, output_text = self.validate_tracks(playlist)
+                        
+                        row["model"] = model
+                        row["effort"] = effort
+                        row["verbosity"] = verb
+                        row['raw_text'] = freeform_response
+                        row["json"] = json.dumps(playlist, indent=2, ensure_ascii=False)
+                        row['check_results'] = output_text
+                        
+                        row['runtime'] = f"{runtime:.2f}"
+                        row['tracks_parsed'] = total
+                        row['tracks_found'] = valid
+                        
 
-                    print(playlist)
-                    
-                    row["model"] = model
-                    row["effort"] = effort
-                    row["verbosity"] = verb
-                    row['raw_text'] = freeform_response
-                    row["json"] = json.dumps(playlist, indent=2, ensure_ascii=False)
-                    row['check_results'] = output_text
-                    
-                    row['runtime'] = f"{runtime:.2f}"
-                    row['tracks_parsed'] = total
-                    row['tracks_found'] = valid
-                    
+                        row['input_tokens'] = usage.input_tokens
+                        row['output_tokens'] = usage.output_tokens
+                        row['total_tokens'] = usage.total_tokens
 
-                    row['input_tokens'] = usage.input_tokens
-                    row['output_tokens'] = usage.output_tokens
-                    row['total_tokens'] = usage.total_tokens
+                    except Exception as e:
+                        row['model'] = f"ERROR: {str(e)}"
 
-                except Exception as e:
-                    row['model'] = f"ERROR: {str(e)}"
-
-                self.results.append(row)
+                    finally:
+                        self.results.append(row)
+                        pbar.update(1)
 
         self.write_csv(self.fieldnames)
 
