@@ -1,27 +1,43 @@
 """
 Logger configuration for playlistGenAI.
 
-Sets up a logger for both console and file output with INFO and DEBUG levels.
+Provides a global logger and a helper to set the log file path per run.
 """
 
 import logging
 import sys
+from typing import Optional
 
 logger = logging.getLogger("playlistGenAI")
 logger.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter(
-    '%(asctime)s - %(levelname)s - %(message)s'
-)
+_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(formatter)
+# Default to console logging; file logging can be configured per run
+# if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+#     _console = logging.StreamHandler(sys.stdout)
+#     _console.setLevel(logging.INFO)
+#     _console.setFormatter(_formatter)
+#     logger.addHandler(_console)
 
-file_handler = logging.FileHandler("playlistGenAI.log", mode="a")
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(formatter)
 
-logger.handlers.clear()
-#logger.addHandler(console_handler)
-logger.addHandler(file_handler)
+def set_log_file(path: str, mode: str = "a", level: int = logging.DEBUG) -> None:
+    """
+    Configure the logger to write to the specified file.
+
+    Existing FileHandlers are removed to avoid duplicate logs.
+
+    Args:
+        path: File path for the log output.
+        mode: File open mode ('a' to append, 'w' to truncate).
+        level: Log level for the file handler.
+    """
+    # Remove existing file handlers
+    for h in list(logger.handlers):
+        if isinstance(h, logging.FileHandler):
+            logger.removeHandler(h)
+
+    fh = logging.FileHandler(path, mode=mode)
+    fh.setLevel(level)
+    fh.setFormatter(_formatter)
+    logger.addHandler(fh)

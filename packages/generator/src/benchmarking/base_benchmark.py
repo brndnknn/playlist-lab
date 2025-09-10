@@ -7,6 +7,7 @@ validating JSON outputs, and checking playlist tracks against Spotify.
 
 import csv
 import json
+from pathlib import Path
 from utils.helpers import extract_array, has_keys
 
 class BaseBenchmark:
@@ -33,6 +34,15 @@ class BaseBenchmark:
         Args:
             fieldnames (list): List of CSV column headers.
         """
+        # Ensure parent directory exists if a nested path was provided
+        try:
+            parent = Path(self.output_csv).parent
+            if str(parent) and str(parent) != ".":
+                parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            # If output_csv is a bare filename or parent creation fails, proceed to open
+            pass
+
         with open(self.output_csv, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()

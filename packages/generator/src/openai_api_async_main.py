@@ -9,12 +9,15 @@ are directly comparable to the sync runner.
 
 import os
 import asyncio
+from pathlib import Path
+from datetime import datetime
 from dotenv import load_dotenv
 
 from playlist_generation.openai_async_manager import OpenAIAsyncManager
 from benchmarking.openai_async_benchmark import OpenAIModelAsyncBenchmark
 from api_clients.token_handler import TokenHandler
 from api_clients.spotify_client import SpotifyClient
+from utils.logger_config import set_log_file
 
 
 load_dotenv()
@@ -30,8 +33,18 @@ async def main_async():
         "gpt-5-nano",
     ]
 
+    # Create per-run output directory under repo-root/output/YYYYMMDD_HHMMSS
+    repo_root = Path(__file__).resolve().parents[3]
+    output_root = repo_root / "output"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_dir = output_root / timestamp
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    # Configure logging to file inside the run directory
+    set_log_file(str(run_dir / "playlistGenAI.log"), mode="w")
+
     manager = OpenAIAsyncManager(API_KEY)
-    csv_file_path = "openai_benchmark_results_async.csv"
+    csv_file_path = str(run_dir / "openai_benchmark_results_async.csv")
 
     token_handler = TokenHandler()
     token = token_handler.load_token()
@@ -54,4 +67,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
