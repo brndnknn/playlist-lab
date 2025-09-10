@@ -6,6 +6,47 @@ Includes JSON array extraction, key checking, and logged HTTP requests.
 
 import requests
 from utils.logger_config import logger
+from copy import deepcopy
+
+
+SENSITIVE_KEYS = {
+    "authorization",
+    "proxy-authorization",
+    "x-api-key",
+    "api_key",
+    "access_token",
+    "refresh_token",
+    "client_secret",
+    "password",
+    "token",
+    "secret",
+}
+
+
+def _redact_value(value: str) -> str:
+    try:
+        s = str(value)
+    except Exception:
+        return "***REDACTED***"
+    # Keep only last 4 chars for reference when long enough
+    return ("***REDACTED***" if len(s) <= 8 else f"***REDACTED***…{s[-4:]}")
+
+
+def _redact_mapping(mapping):
+    try:
+        data = deepcopy(mapping)
+    except Exception:
+        return "***REDACTED***"
+    if isinstance(data, dict):
+        redacted = {}
+        for k, v in data.items():
+            key_lower = str(k).lower()
+            if key_lower in SENSITIVE_KEYS or any(w in key_lower for w in ("auth", "secret", "token", "password", "key")):
+                redacted[k] = _redact_value(v)
+            else:
+                redacted[k] = v
+        return redacted
+    return data
 
 
 def extract_array(text):
@@ -62,11 +103,11 @@ def logged_request(method, url, **kwargs):
     try:
         logger.info(f"HTTP {method.upper()} {url}")
         if 'params' in kwargs:
-            logger.debug(f"Query Params: {kwargs['params']}")
+            logger.debug(f"Query Params: {_redact_mapping(kwargs['params'])}")
         if 'json' in kwargs:
-            logger.debug(f"JSON Body: {kwargs['json']}")
+            logger.debug(f"JSON Body: {_redact_mapping(kwargs['json'])}")
         if 'headers' in kwargs:
-            logger.debug(f"Headers: {kwargs['headers']}")
+            logger.debug(f"Headers: {_redact_mapping(kwargs['headers'])}")
 
         response = requests.request(method, url, **kwargs)
 

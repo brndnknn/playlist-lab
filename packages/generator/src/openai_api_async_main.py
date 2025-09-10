@@ -33,6 +33,13 @@ async def main_async():
         "gpt-5-nano",
     ]
 
+    effort = [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+    ]
+
     # Create per-run output directory under repo-root/output/YYYYMMDD_HHMMSS
     repo_root = Path(__file__).resolve().parents[3]
     output_root = repo_root / "output"
@@ -54,6 +61,7 @@ async def main_async():
         prompts=prompts,
         models=models,
         manager=manager,
+        effort=effort,
         output_csv=csv_file_path,
         spotify_client=spotify_client,
     )
