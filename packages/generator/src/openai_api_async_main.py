@@ -27,17 +27,28 @@ API_KEY = os.getenv("OPENAI_API_KEY")
 async def main_async():
     prompts = [
         "Darth Vader's tea party playlist",
+        "Playlist for aliens trying to blend in at a human barbecue",
+        "The Joker’s grocery shopping playlist",
     ]
 
     models = [
+        # "gpt-5",
+        # "gpt-5-mini",
         "gpt-5-nano",
+        # "gpt-5-chat-latest"
     ]
 
     effort = [
         "minimal",
+        # "low",
+        # "medium",
+        # "high"
+    ]
+
+    verb = [
         "low",
-        "medium",
-        "high"
+        # "medium",
+        # "high"
     ]
 
     # Create per-run output directory under repo-root/output/YYYYMMDD_HHMMSS
@@ -62,6 +73,7 @@ async def main_async():
         models=models,
         manager=manager,
         effort=effort,
+        verb=verb,
         output_csv=csv_file_path,
         spotify_client=spotify_client,
     )

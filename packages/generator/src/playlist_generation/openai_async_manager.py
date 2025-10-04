@@ -3,6 +3,7 @@ import asyncio
 import random
 import time
 from openai import AsyncOpenAI
+from utils.logger_config import logger
 
 R = TypeVar("R")
 
@@ -71,8 +72,21 @@ class OpenAIAsyncManager:
                     input=prompt,
                 )
 
-            resp = await self._with_retry(_call)
-            return resp.output_text, resp.usage
+            operation = self._format_operation(
+                "responses.create",
+                model=model,
+                prompt_preview=self._preview(prompt),
+            )
+            resp = await self._with_retry(_call, operation)
+            text = getattr(resp, "output_text", "")
+            usage = getattr(resp, "usage", None)
+            logger.info(
+                "OpenAI call %s completed; output='%s'; usage=%s",
+                operation,
+                self._preview(text, limit=120),
+                self._format_usage(usage),
+            )
+            return text, usage
         
         
     async def convert_to_json(self, freeform_playlist_text: str) -> str:
@@ -84,14 +98,42 @@ class OpenAIAsyncManager:
                     instructions=self.alt_sys_prompt,
                     input=freeform_playlist_text,
                 )
-            resp = await self._with_retry(_call)
-            return resp.output_text
+            operation = self._format_operation(
+                "responses.create",
+                model=self.model,
+                prompt_preview=self._preview(freeform_playlist_text),
+                note="json_conversion",
+            )
+            resp = await self._with_retry(_call, operation)
+            text = getattr(resp, "output_text", "")
+            logger.info(
+                "OpenAI call %s completed; json_preview='%s'",
+                operation,
+                self._preview(text, limit=120),
+            )
+            return text
 
-    async def _with_retry(self, fn: Callable[[], Awaitable[R]]) -> R:
+    async def _with_retry(self, fn: Callable[[], Awaitable[R]], operation: str) -> R:
             last_err = None
             for attempt in range(self.max_retries):
                 try:
-                    return await fn()
+                    logger.debug(
+                        "OpenAI call %s attempt %s/%s", operation, attempt + 1, self.max_retries
+                    )
+                    result = await fn()
+                    logger.debug(
+                        "OpenAI call %s succeeded on attempt %s/%s",
+                        operation,
+                        attempt + 1,
+                        self.max_retries,
+                    )
+                    logger.debug(
+                        "OpenAI call %s succeeded on attempt %s/%s",
+                        operation,
+                        attempt + 1,
+                        self.max_retries,
+                    )
+                    return result
                 except Exception as e:
                     last_err = e
                     # Decide if retryable
@@ -114,14 +156,56 @@ class OpenAIAsyncManager:
                         or invalid_prompt
                     )
                     if not is_retryable or attempt == self.max_retries - 1:
+                        logger.error(
+                            "OpenAI call %s failed on attempt %s/%s: %s",
+                            operation,
+                            attempt + 1,
+                            self.max_retries,
+                            e,
+                        )
                         raise
                     # Prefer server-provided retry hints
                     delay = self._retry_after_from_error(e)
                     if delay is None:
                         # Exponential backoff with jitter
                         delay = self.backoff_base * (2 ** attempt) + random.uniform(0, 0.25)
+                    logger.warning(
+                        "OpenAI call %s retrying after %.2fs due to %s",
+                        operation,
+                        delay,
+                        e,
+                    )
                     await self._sleep(delay)
             raise last_err
+
+    def _format_operation(self, endpoint: str, *, model: str, prompt_preview: str, note: Optional[str] = None) -> str:
+            parts = [endpoint, f"model={model}", f"prompt='{prompt_preview}'"]
+            if note:
+                parts.append(f"note={note}")
+            return " | ".join(parts)
+
+    def _preview(self, text: str, limit: int = 80) -> str:
+            if text is None:
+                return "<none>"
+            cleaned = " ".join(str(text).split())
+            if len(cleaned) <= limit:
+                return cleaned
+            return cleaned[: limit - 3] + "..."
+
+    def _format_usage(self, usage) -> str:
+            if not usage:
+                return "{}"
+            try:
+                return (
+                    f"tokens(input={getattr(usage, 'input_tokens', None)}, "
+                    f"output={getattr(usage, 'output_tokens', None)}, "
+                    f"total={getattr(usage, 'total_tokens', None)})"
+                )
+            except Exception:
+                try:
+                    return str(usage)
+                except Exception:
+                    return "{unavailable}"
 
     def _retry_after_from_error(self, err) -> Optional[float]:
             """Extract server-suggested delay (seconds) from error response headers, if any."""

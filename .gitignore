@@ -1,6 +1,7 @@
 # output files
 *.csv
 *.log
+output/
 
 # API access
 token.json
