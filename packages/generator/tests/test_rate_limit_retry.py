@@ -12,6 +12,7 @@ from .mocks import (
     FakeRateLimitError,
     FakeServerError,
     FakeRequestsResponse,
+    FakeInvalidPromptError,
     make_openai_success,
 )
 
@@ -103,6 +104,37 @@ def test_openai_manager_raises_after_retry_exhaustion(monkeypatch):
         asyncio.run(manager.get_response("prompt"))
 
     assert pytest.approx(delays) == [0.1, 0.2]
+
+
+def test_openai_manager_retries_invalid_prompt(monkeypatch):
+    delays: list[float] = []
+
+    async def fake_sleep(duration: float) -> None:
+        delays.append(duration)
+
+    monkeypatch.setattr(oam.random, "uniform", lambda *_: 0.0)
+
+    client = FakeAsyncOpenAIClient(
+        [
+            FakeInvalidPromptError(
+                message="Invalid prompt: flagged by policy", code="invalid_prompt"
+            ),
+            make_openai_success("clean")
+        ]
+    )
+
+    manager = OpenAIAsyncManager(
+        api_key="key",
+        max_retries=3,
+        backoff_base=0.2,
+        client=client,
+        sleep=fake_sleep,
+    )
+
+    text, _ = asyncio.run(manager.get_response("prompt"))
+
+    assert text == "clean"
+    assert pytest.approx(delays) == [0.2]
 
 
 def test_logged_request_retries_on_rate_limit(monkeypatch):

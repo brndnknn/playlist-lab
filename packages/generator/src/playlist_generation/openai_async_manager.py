@@ -98,9 +98,20 @@ class OpenAIAsyncManager:
                     msg = str(e).lower()
                     status = getattr(e, "status_code", None) or getattr(e, "status", None)
                     retryable_status = {408, 409, 429, 500, 502, 503, 504}
+                    code = str(getattr(e, "code", "") or "").lower()
+                    invalid_prompt = (
+                        status == 400 and (
+                            "invalid_prompt" in code or "invalid prompt" in msg
+                        )
+                    )
                     is_retryable = (
-                        (status in retryable_status) or
-                        ("rate limit" in msg) or ("retry" in msg) or ("temporar" in msg) or ("timeout" in msg) or ("server error" in msg)
+                        (status in retryable_status)
+                        or ("rate limit" in msg)
+                        or ("retry" in msg)
+                        or ("temporar" in msg)
+                        or ("timeout" in msg)
+                        or ("server error" in msg)
+                        or invalid_prompt
                     )
                     if not is_retryable or attempt == self.max_retries - 1:
                         raise

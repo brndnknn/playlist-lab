@@ -35,6 +35,14 @@ class FakeServerError(Exception):
         self.response = SimpleNamespace(headers={})
 
 
+class FakeInvalidPromptError(Exception):
+    def __init__(self, message: str = "Invalid prompt", code: str = "invalid_prompt") -> None:
+        super().__init__(message)
+        self.status_code = 400
+        self.code = code
+        self.response = SimpleNamespace(headers={})
+
+
 class FakeAsyncOpenAIClient:
     """AsyncOpenAI shim that replays a scripted sequence of outcomes."""
 
