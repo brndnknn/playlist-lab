@@ -4,6 +4,8 @@ Helper functions for making HTTP requests and parsing model output.
 Includes JSON array extraction, key checking, and logged HTTP requests.
 """
 
+import time
+import random
 import requests
 from utils.logger_config import logger
 from copy import deepcopy
@@ -84,7 +86,7 @@ def has_keys(obj, key1, key2):
     return key1 in obj and key2 in obj
 
 
-def logged_request(method, url, **kwargs):
+def logged_request(method, url, retries: int = 4, backoff_base: float = 0.5, **kwargs):
     """
     Makes an HTTP request and logs detailed request/response info.
 
@@ -109,15 +111,63 @@ def logged_request(method, url, **kwargs):
         if 'headers' in kwargs:
             logger.debug(f"Headers: {_redact_mapping(kwargs['headers'])}")
 
-        response = requests.request(method, url, **kwargs)
+        attempt = 0
+        while True:
+            try:
+                response = requests.request(method, url, **kwargs)
+                logger.info(f"Response Status: {response.status_code}")
+                logger.debug(f"Response Headers: {_redact_mapping(response.headers)}")
+                logger.debug(f"Response Body: {response.text}")
 
-        logger.info(f"Response Status: {response.status_code}")
-        logger.debug(f"Response Headers: {response.headers}")
-        logger.debug(f"Response Body: {response.text}")
+                # Retry on 429 and 5xx
+                if response.status_code in {429, 500, 502, 503, 504} and attempt < retries:
+                    delay = _retry_after_from_headers(response.headers)
+                    if delay is None:
+                        delay = backoff_base * (2 ** attempt) + random.uniform(0, 0.25)
+                    logger.warning(f"Transient HTTP {response.status_code}; retrying in {delay:.2f}s")
+                    time.sleep(delay)
+                    attempt += 1
+                    continue
 
-        response.raise_for_status()
-        return response
-    
+                response.raise_for_status()
+                return response
+            except requests.exceptions.RequestException as e:
+                # Retry network errors/timeouts
+                if attempt < retries:
+                    delay = backoff_base * (2 ** attempt) + random.uniform(0, 0.25)
+                    logger.warning(f"Request error '{e}'; retrying in {delay:.2f}s")
+                    time.sleep(delay)
+                    attempt += 1
+                    continue
+                raise
     except requests.exceptions.RequestException as e:
         logger.error(f"Request failed: {e}")
         raise
+
+def _retry_after_from_headers(headers) -> float | None:
+    """Best-effort extraction of server-suggested retry delay in seconds.
+
+    Checks 'Retry-After' and common rate-limit reset headers.
+    """
+    try:
+        h = {str(k).lower(): v for k, v in headers.items()}
+        ra = h.get("retry-after")
+        if ra is not None:
+            try:
+                return float(ra)
+            except Exception:
+                return None
+        reset = h.get("x-ratelimit-reset") or h.get("x-ratelimit-reset-requests") or h.get("x-ratelimit-reset-tokens")
+        if reset is not None:
+            try:
+                val = float(reset)
+                if val > 1e6:
+                    return max(0.0, val - time.time())
+                return max(0.0, val)
+            except Exception:
+                return None
+    except Exception:
+        return None
+    return None
+    
+
