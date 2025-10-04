@@ -89,13 +89,10 @@ class OpenAIModelAsyncBenchmark(BaseBenchmark):
         # Prepare tasks
         tasks = [self._run_single(prompt, model, effort, verb, sem) for (prompt, model, effort, verb) in combos]
 
-        self.results = []
+        self.reset_results()
+        self.initialize_csv(self.fieldnames)
         with tqdm(total=total, desc="OpenAI async benchmarks", unit="run", dynamic_ncols=True) as pbar:
             for coro in asyncio.as_completed(tasks):
                 row = await coro
-                self.results.append(row)
+                self.record_result(row)
                 pbar.update(1)
-
-        # Persist results
-        self.write_csv(self.fieldnames)
-

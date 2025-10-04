@@ -35,11 +35,22 @@ class ModelBenchmark(BaseBenchmark):
         self.results = []
         self.llm_manager = OllamaManager()
         self.spotify_client = spotify_client
+        self.row_fieldnames = [
+            "model",
+            "prompt",
+            "runtime_sec",
+            "output",
+            "tracks_parsed",
+            "tracks_found",
+            "check_results",
+        ]
 
     def run_benchmarks(self):
         """
         Runs the benchmark test for all (model, prompt) pairs and writes results to CSV.
         """
+        self.reset_results()
+        self.initialize_csv(self.row_fieldnames)
         for model in self.models:
             print(f'Starting model {model}')
             if not self.llm_manager.is_ollama_running(model):
@@ -48,7 +59,7 @@ class ModelBenchmark(BaseBenchmark):
                 self.__run_single_test(model, prompt)
 
         if self.output_csv:
-            self.__write_csv()
+            self._write_summary()
 
     def __run_single_test(self, model, prompt):
         """
@@ -90,7 +101,7 @@ class ModelBenchmark(BaseBenchmark):
                 "check_results": check_results
             }
 
-            self.results.append(result)
+            self.record_result(result)
         
         except subprocess.CalledProcessError as e:
             # If there's an error running the command, store that info too
@@ -109,7 +120,7 @@ class ModelBenchmark(BaseBenchmark):
                 "tracks_found": 0
             }
 
-            self.results.append(result)
+            self.record_result(result)
 
     def is_valid_json_playlist(self, output):
         """
@@ -129,24 +140,12 @@ class ModelBenchmark(BaseBenchmark):
         except Exception:
             return False
 
-    def __write_csv(self):
+    def _write_summary(self):
         """
         Writes all benchmark results and summaries to CSV.
         """
-
-        fieldnames = [
-            "model",
-            "prompt",
-            "runtime_sec",
-            "output",
-            "tracks_parsed",
-            "tracks_found",
-            "check_results"
-        ]
-        self.write_csv(fieldnames)
-
         with open(self.output_csv, "a", encoding="utf-8", newline="") as csvfile:
-            writer=csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer = csv.DictWriter(csvfile, fieldnames=self.row_fieldnames)
 
             # Append summaries after a blank line.
             csvfile.write("\n")
@@ -224,7 +223,6 @@ class ModelBenchmark(BaseBenchmark):
                     "tracks_found": round(avg_tracks_found, 2),
                     "check_results": round(valid_track_rate, 2)
                 })
-
 
 
 

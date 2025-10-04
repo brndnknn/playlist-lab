@@ -7,6 +7,7 @@ validating JSON outputs, and checking playlist tracks against Spotify.
 
 import csv
 import json
+import threading
 from pathlib import Path
 from utils.helpers import extract_array, has_keys
 
@@ -26,27 +27,62 @@ class BaseBenchmark:
         self.output_csv = output_csv
         self.spotify_client = spotify_client
         self.results = []
+        self._csv_lock = threading.Lock()
+        self._csv_initialized = False
+        self._fieldnames = None
 
-    def write_csv(self, fieldnames):
-        """
-        Writes benchmark results to a CSV file.
+    def reset_results(self):
+        """Clear accumulated in-memory results."""
+        with self._csv_lock:
+            self.results = []
 
-        Args:
-            fieldnames (list): List of CSV column headers.
-        """
-        # Ensure parent directory exists if a nested path was provided
-        try:
-            parent = Path(self.output_csv).parent
-            if str(parent) and str(parent) != ".":
-                parent.mkdir(parents=True, exist_ok=True)
-        except Exception:
-            # If output_csv is a bare filename or parent creation fails, proceed to open
-            pass
+    def initialize_csv(self, fieldnames):
+        """Create or reset the CSV file and write its header once."""
+        if not self.output_csv:
+            return
 
-        with open(self.output_csv, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(self.results)
+        normalized = list(fieldnames)
+        with self._csv_lock:
+            if self._csv_initialized:
+                if normalized != self._fieldnames:
+                    raise ValueError("CSV already initialized with different fieldnames")
+                return
+
+            try:
+                parent = Path(self.output_csv).parent
+                if str(parent) and str(parent) != ".":
+                    parent.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
+
+            with open(self.output_csv, "w", encoding="utf-8", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=normalized)
+                writer.writeheader()
+
+            self._fieldnames = normalized
+            self._csv_initialized = True
+
+    def append_csv_row(self, row: dict):
+        """Append a single row to the CSV in a concurrency-safe way."""
+        if not self.output_csv:
+            return
+        with self._csv_lock:
+            self._write_row_locked(row)
+
+    def record_result(self, row: dict):
+        """Persist a result in-memory and to disk immediately."""
+        with self._csv_lock:
+            self.results.append(row)
+            self._write_row_locked(row)
+
+    def _write_row_locked(self, row: dict):
+        if not self.output_csv:
+            return
+        if not self._csv_initialized:
+            raise RuntimeError("CSV must be initialized before writing rows")
+        with open(self.output_csv, "a", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=self._fieldnames)
+            writer.writerow(row)
 
     def validate_json(self, input_text):
         """
